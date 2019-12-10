@@ -1,0 +1,22 @@
+{
+  "name": "howmies-api",
+  "version": "1.0.0",
+  "description": "The backend of the Howmies project owned by Matthew (ThankGod) Nte, partnering with me: Akanji Tobi (Tboy-AK).",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Matthewnte/Howmies-api.git"
+  },
+  "author": "Akanji Tobi (Tboy-AK)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Matthewnte/Howmies-api/issues"
+  },
+  "homepage": "https://github.com/Matthewnte/Howmies-api#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
