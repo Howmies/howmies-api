@@ -8,15 +8,15 @@ const pool = require('../elephantsql');
 const router = express.Router();
 
 const tokenKeys = {
-  keyPrivate: fs.readFileSync(path.resolve(__dirname, 'rsa_1024_priv.pem')),
-  keyPublic: fs.readFileSync(path.resolve(__dirname, 'rsa_1024_pub.pem')),
+  keyPrivate: fs.readFileSync(path.resolve(__dirname, '../secrets/rsa_1024_priv.pem')),
+  keyPublic: fs.readFileSync(path.resolve(__dirname, '../secrets/rsa_1024_pub.pem')),
 };
 
 const salt = bcrypt.genSaltSync(10);
 
 const expiresIn = '30 minutes';
 
-router.post('/api/v1/auth/real_estate_agents/signup', (req, response) => {
+router.post('/signup', (req, response) => {
   const {
     agentName, address, lga, state, email, officeNumber, mobileNumber, password,
   } = req.body;
@@ -31,7 +31,7 @@ router.post('/api/v1/auth/real_estate_agents/signup', (req, response) => {
       })
       .end();
   } else {
-    pool.query('INSERT INTO real_estate_agents(agent_name, address, lga, state, email, office_number, mobile_number, password) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+    pool.query('INSERT INTO real_estate_agents(agent_name, address, lga, state, email, office_number, mobile_number, agent_password) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
       [agentName,
         address,
         lga,
