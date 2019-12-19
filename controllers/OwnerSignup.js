@@ -18,21 +18,13 @@ const salt = bcrypt.genSaltSync(10);
 const expiresIn = '20 minutes';
 
 exports.requestValidator = [
-  body('agentName').trim(' ')
+  body('firstName').trim(' ')
     .notEmpty()
-    .withMessage('Input agency name')
+    .withMessage('Input your first name')
     .escape(),
-  body('address').trim(' ')
+  body('lastName').trim(' ')
     .notEmpty()
-    .withMessage('Input office address')
-    .escape(),
-  body('lga').trim(' ')
-    .notEmpty()
-    .withMessage('Input office local government area')
-    .escape(),
-  body('state').trim(' ')
-    .notEmpty()
-    .withMessage('Input the state your office is located')
+    .withMessage('Input your last name')
     .escape(),
   body('email').trim(' ')
     .notEmpty()
@@ -40,15 +32,15 @@ exports.requestValidator = [
     .isEmail()
     .withMessage('Input correct email address')
     .normalizeEmail({ all_lowercase: true }),
-  body('officeNumber').trim(' ')
+  body('phoneNumber').trim(' ')
     .notEmpty()
-    .withMessage('Input a phone number into the office number field')
+    .withMessage('Input a phone number into the phone number field')
     .isLength({ max: 14, min: 11 })
     .withMessage('Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789')
     .escape(),
-  body('mobileNumber').trim(' ')
+  body('otherPhone').trim(' ')
     .notEmpty()
-    .withMessage('Do not send empty data in the optional mobile number field')
+    .withMessage('Do not send empty data in the optional phone number field')
     .isLength({ max: 14, min: 11 })
     .withMessage('Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789')
     .escape()
@@ -66,17 +58,15 @@ exports.signup = (req, response) => {
   if (!errors.isEmpty()) { return response.status(422).send({ error: errors.array() }); }
 
   const {
-    agentName,
-    address,
-    lga,
-    state,
+    firstName,
+    lastName,
     email,
-    officeNumber,
-    mobileNumber,
+    phoneNumber,
+    otherPhone,
     password,
   } = req.body;
 
-  pool.query('SELECT owner_email, client_email FROM property_owners, clients WHERE owner_email=$1 OR client_email=$1;', [email], (err, result) => {
+  pool.query('SELECT email FROM real_estate_agents WHERE email=$1', [email], (err, result) => {
     if (err) {
       return response.status(500).send({
         status: response.statusCode,
@@ -90,38 +80,36 @@ exports.signup = (req, response) => {
       response.status(400)
         .send({
           status: response.statusCode,
-          data: { warningMessage: 'Account exists as Property Owner or Client' },
+          data: { warningMessage: 'Account exists as Real Estate Agent' },
         });
-    } else if (officeNumber.length !== 11 && officeNumber.length !== 14) {
+    } else if (phoneNumber.length !== 11 && phoneNumber.length !== 14) {
       response.status(400)
         .send({
           status: response.statusCode,
-          data: { warningMessage: 'Input a valid phone number into the main office number field' },
+          data: { warningMessage: 'Input a valid phone number into the main phone number field' },
         });
-    } else if (mobileNumber && mobileNumber.length !== 11 && mobileNumber.length !== 14) {
+    } else if (otherPhone && otherPhone.length !== 11 && otherPhone.length !== 14) {
       response.status(400)
         .send({
           status: response.statusCode,
-          data: { warningMessage: 'Input a valid phone number into the mobile phone number field' },
+          data: { warningMessage: 'Input a valid phone number into the other phone number field' },
         });
-    } else if (officeNumber === mobileNumber) {
+    } else if (phoneNumber === otherPhone) {
       response.status(400)
         .send({
           status: response.statusCode,
-          data: { warningMessage: 'mobile number must not be the same as office number' },
+          data: { warningMessage: 'Use a different phone number for the other phone number field' },
         });
     } else {
       const passwordCrypt = bcrypt.hashSync(password, salt);
       const token = jwt.sign({ email, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
 
-      pool.query('INSERT INTO real_estate_agents(agent_name, address, lga, state, email, office_number, mobile_number, agent_password) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-        [agentName,
-          address,
-          lga,
-          state,
+      pool.query('INSERT INTO property_owners(owner_fname, owner_lname, owner_email, owner_phone_number, owner_other_phone, owner_password) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
+        [firstName,
+          lastName,
           email,
-          officeNumber,
-          (mobileNumber && mobileNumber.length) ? mobileNumber : null,
+          phoneNumber,
+          (otherPhone && otherPhone.length) ? otherPhone : null,
           passwordCrypt],
         (err1, result1) => {
           if (err1) {
@@ -135,7 +123,7 @@ exports.signup = (req, response) => {
 
           response.set('Authorization', token).send({
             token,
-            agentID: result1.rows[0].agent_id,
+            ownerID: result1.rows[0].owner_id,
           });
         });
     }
