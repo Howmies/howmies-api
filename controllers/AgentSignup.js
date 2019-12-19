@@ -36,7 +36,14 @@ exports.signup = (req, response) => {
   const token = jwt.sign({ email, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
 
   pool.query('SELECT owner_email, client_email FROM property_owners, clients WHERE owner_email=$1 OR client_email=$1;', [email], (err, result) => {
-    if (err) { return response.sendStatus(500); }
+    if (err) {
+      return response.status(500).send({
+        status: response.statusCode,
+        data: {
+          warningMessage: 'Internal Server error',
+        },
+      });
+    }
 
     if (result.rows.length !== 0) {
       response.status(400)
