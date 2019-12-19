@@ -1,10 +1,10 @@
 const express = require('express');
 const { body, sanitizeBody } = require('express-validator');
-const AgentSignup = require('../Controllers/AgentSignupController');
+const AgentSignup = require('../controllers/AgentSignup');
 
 const router = express.Router();
 
-router.post('/signup', [
+const expressValidatorMiddleware = [
   sanitizeBody('agentName').escape(),
   sanitizeBody('address').escape(),
   sanitizeBody('lga').escape(),
@@ -14,7 +14,9 @@ router.post('/signup', [
   body('mobileNumber').isLength({ max: 14, min: 11 }).escape().optional({ nullable: true }),
   body('password')
     .isLength({ max: 24, min: 8 })
-    .withMessage('password range from 8 to 16'),
-], AgentSignup);
+    .withMessage('Password must be between 8 - 24 characters'),
+];
+
+router.post('/signup', expressValidatorMiddleware, AgentSignup.signup);
 
 module.exports = router;

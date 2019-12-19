@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const server = express();
 
-const realEstateAgent = require('./Routes/AgentRoutes');
+const realEstateAgent = require('./routes/AgentSignup');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

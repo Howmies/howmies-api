@@ -17,7 +17,7 @@ const salt = bcrypt.genSaltSync(10);
 
 const expiresIn = '20 minutes';
 
-module.exports = (req, response) => {
+exports.signup = (req, response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) { return response.status(422).send({ error: errors.array() }); }
 
