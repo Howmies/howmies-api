@@ -4,7 +4,7 @@
   "description": "The backend of the Howmies project owned by Matthew (ThankGod) Nte, partnering with me: Akanji Tobi (Tboy-AK).",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
     "express-validator": "^6.3.0",
     "jasmine": "^3.5.0",
     "jsonwebtoken": "^8.5.1",
-    "pg": "^7.14.0"
+    "pg": "^7.14.0",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "eslint": "^6.7.2",

@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 
-exports.agentRequestValidator = [
+exports.agentSignupValidator = [
   body('agentName')
     .trim(' ')
     .notEmpty()
@@ -32,21 +32,23 @@ exports.agentRequestValidator = [
     .trim(' ')
     .notEmpty()
     .withMessage('Input a phone number into the office number field')
-    .isLength({ max: 14, min: 11 })
+    .custom((value) => value.length === 11 || value.length === 14)
     .withMessage(
       'Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789',
     )
     .escape(),
   body('mobileNumber')
+    .optional({ nullable: true })
+    .custom((value, { req }) => value !== req.body.officeNumber)
+    .withMessage(
+      'mobile number must not be the same as office number',
+    )
     .trim(' ')
-    .notEmpty()
-    .withMessage('Do not send empty data in the optional mobile number field')
-    .isLength({ max: 14, min: 11 })
+    .custom((value) => value.length === 11 || value.length === 14)
     .withMessage(
       'Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789',
     )
-    .escape()
-    .optional({ nullable: true }),
+    .escape(),
   body('password')
     .trim(' ')
     .notEmpty()
@@ -54,49 +56,14 @@ exports.agentRequestValidator = [
     .isLength({ max: 24, min: 8 })
     .withMessage('Password must be between 8 - 24 characters')
     .escape(),
-];
-
-exports.ownerRequestValidator = [
-  body('firstName')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input your first name')
-    .escape(),
-  body('lastName')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input your last name')
-    .escape(),
-  body('email')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input a user email')
-    .isEmail()
-    .withMessage('Input correct email address')
-    .normalizeEmail({ all_lowercase: true }),
-  body('phoneNumber')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input a phone number into the phone number field')
-    .isLength({ max: 14, min: 11 })
+  body('confirmPassword')
+    .custom((value, { req }) => value === req.body.password)
     .withMessage(
-      'Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789',
+      'confirmation password must be the same as the password you entered',
     )
-    .escape(),
-  body('otherPhone')
     .trim(' ')
     .notEmpty()
-    .withMessage('Do not send empty data in the optional phone number field')
-    .isLength({ max: 14, min: 11 })
-    .withMessage(
-      'Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789',
-    )
-    .escape()
-    .optional({ nullable: true }),
-  body('password')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input a user password')
+    .withMessage('Confirm your user password')
     .isLength({ max: 24, min: 8 })
     .withMessage('Password must be between 8 - 24 characters')
     .escape(),

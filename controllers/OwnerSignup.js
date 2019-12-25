@@ -19,7 +19,7 @@ const expiresIn = '20 minutes';
 
 exports.signup = (req, response) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) { return response.status(422).send({ error: errors.array() }); }
+  if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   const {
     firstName,
@@ -28,41 +28,24 @@ exports.signup = (req, response) => {
     phoneNumber,
     otherPhone,
     password,
+    confirmPassword,
   } = req.body;
 
   pool.query('SELECT email FROM real_estate_agents WHERE email=$1', [email], (err, result) => {
     if (err) {
       return response.status(500).send({
         status: response.statusCode,
-        data: {
-          warningMessage: 'Internal Server error',
-        },
+        message: 'Internal Server error',
+        data: {},
       });
     }
 
     if (result.rows.length !== 0) {
-      response.status(400)
+      response.status(406)
         .send({
           status: response.statusCode,
-          data: { warningMessage: 'Account exists as Real Estate Agent' },
-        });
-    } else if (phoneNumber.length !== 11 && phoneNumber.length !== 14) {
-      response.status(400)
-        .send({
-          status: response.statusCode,
-          data: { warningMessage: 'Input a valid phone number into the main phone number field' },
-        });
-    } else if (otherPhone && otherPhone.length !== 11 && otherPhone.length !== 14) {
-      response.status(400)
-        .send({
-          status: response.statusCode,
-          data: { warningMessage: 'Input a valid phone number into the other phone number field' },
-        });
-    } else if (phoneNumber === otherPhone) {
-      response.status(400)
-        .send({
-          status: response.statusCode,
-          data: { warningMessage: 'Use a different phone number for the other phone number field' },
+          message: 'Account exists as Real Estate Agent',
+          data: {},
         });
     } else {
       const passwordCrypt = bcrypt.hashSync(password, salt);
@@ -79,15 +62,17 @@ exports.signup = (req, response) => {
           if (err1) {
             return response.status(406).send({
               status: err1.name,
-              data: {
-                warningMessage: (err1.stack.includes('duplicate', 0)) ? 'Account already in use' : 'Internal Server Error',
-              },
+              message: (err1.stack.includes('duplicate', 0)) ? 'Account already in use' : 'Internal Server Error',
+              data: {},
             });
           }
 
           response.set('Authorization', token).send({
-            token,
-            ownerID: result1.rows[0].owner_id,
+            message: 'Successfully signed up',
+            data: {
+              token,
+              ownerID: result1.rows[0].owner_id,
+            },
           });
         });
     }

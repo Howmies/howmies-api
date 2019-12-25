@@ -19,7 +19,7 @@ const expiresIn = '20 minutes';
 
 exports.signup = (req, response) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) { return response.status(422).send({ error: errors.array() }); }
+  if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   const {
     agentName,
@@ -30,41 +30,22 @@ exports.signup = (req, response) => {
     officeNumber,
     mobileNumber,
     password,
+    confirmPassword,
   } = req.body;
 
   pool.query('SELECT owner_email, client_email FROM property_owners, clients WHERE owner_email=$1 OR client_email=$1;', [email], (err, result) => {
     if (err) {
       return response.status(500).send({
-        status: response.statusCode,
-        data: {
-          warningMessage: 'Internal Server error',
-        },
+        message: 'Internal Server error',
+        data: {},
       });
     }
 
     if (result.rows.length !== 0) {
-      response.status(400)
+      response.status(406)
         .send({
-          status: response.statusCode,
-          data: { warningMessage: 'Account exists as Property Owner or Client' },
-        });
-    } else if (officeNumber.length !== 11 && officeNumber.length !== 14) {
-      response.status(400)
-        .send({
-          status: response.statusCode,
-          data: { warningMessage: 'Input a valid phone number into the main office number field' },
-        });
-    } else if (mobileNumber && mobileNumber.length !== 11 && mobileNumber.length !== 14) {
-      response.status(400)
-        .send({
-          status: response.statusCode,
-          data: { warningMessage: 'Input a valid phone number into the mobile phone number field' },
-        });
-    } else if (officeNumber === mobileNumber) {
-      response.status(400)
-        .send({
-          status: response.statusCode,
-          data: { warningMessage: 'mobile number must not be the same as office number' },
+          message: 'Account exists as Property Owner or Client',
+          data: {},
         });
     } else {
       const passwordCrypt = bcrypt.hashSync(password, salt);
@@ -83,15 +64,17 @@ exports.signup = (req, response) => {
           if (err1) {
             return response.status(406).send({
               status: err1.name,
-              data: {
-                warningMessage: (err1.stack.includes('duplicate', 0)) ? 'Account already in use' : 'Internal Server Error',
-              },
+              message: (err1.stack.includes('duplicate', 0)) ? 'Account already in use' : 'Internal Server Error',
+              data: {},
             });
           }
 
           response.set('Authorization', token).send({
-            token,
-            agentID: result1.rows[0].agent_id,
+            message: 'Successfully signed up',
+            data: {
+              token,
+              agentID: result1.rows[0].agent_id,
+            },
           });
         });
     }
