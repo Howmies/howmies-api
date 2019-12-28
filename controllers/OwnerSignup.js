@@ -22,20 +22,19 @@ exports.signup = (req, response) => {
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   const {
-    agentName,
-    address,
-    lga,
-    state,
+    firstName,
+    lastName,
     email,
-    officeNumber,
-    mobileNumber,
+    phoneNumber,
+    otherPhone,
     password,
     confirmPassword,
   } = req.body;
 
-  pool.query('SELECT owner_email, client_email FROM property_owners, clients WHERE owner_email=$1 OR client_email=$1;', [email], (err, result) => {
+  pool.query('SELECT email FROM real_estate_agents WHERE email=$1', [email], (err, result) => {
     if (err) {
       return response.status(500).send({
+        status: response.statusCode,
         message: 'Internal Server error',
         data: {},
       });
@@ -44,21 +43,20 @@ exports.signup = (req, response) => {
     if (result.rows.length !== 0) {
       response.status(406)
         .send({
-          message: 'Account exists as Property Owner or Client',
+          status: response.statusCode,
+          message: 'Account exists as Real Estate Agent',
           data: {},
         });
     } else {
       const passwordCrypt = bcrypt.hashSync(password, salt);
       const token = jwt.sign({ email, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
 
-      pool.query('INSERT INTO real_estate_agents(agent_name, address, lga, state, email, office_number, mobile_number, agent_password) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-        [agentName,
-          address,
-          lga,
-          state,
+      pool.query('INSERT INTO property_owners(owner_fname, owner_lname, owner_email, owner_phone_number, owner_other_phone, owner_password) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
+        [firstName,
+          lastName,
           email,
-          officeNumber,
-          (mobileNumber && mobileNumber.length) ? mobileNumber : null,
+          phoneNumber,
+          (otherPhone && otherPhone.length) ? otherPhone : null,
           passwordCrypt],
         (err1, result1) => {
           if (err1) {
@@ -73,7 +71,7 @@ exports.signup = (req, response) => {
             message: 'Successfully signed up',
             data: {
               token,
-              agentID: result1.rows[0].agent_id,
+              ownerID: result1.rows[0].owner_id,
             },
           });
         });
