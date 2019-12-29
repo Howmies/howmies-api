@@ -1,25 +1,15 @@
 const { body } = require('express-validator');
 
-exports.agentSignupValidator = [
-  body('agentName')
+exports.clientSignupValidator = [
+  body('firstName')
     .trim(' ')
     .notEmpty()
-    .withMessage('Input agency name')
+    .withMessage('Input your first name')
     .escape(),
-  body('address')
+  body('lastName')
     .trim(' ')
     .notEmpty()
-    .withMessage('Input office address')
-    .escape(),
-  body('lga')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input office local government area')
-    .escape(),
-  body('state')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Input the state your office is located')
+    .withMessage('Input your last name')
     .escape(),
   body('email')
     .trim(' ')
@@ -31,18 +21,9 @@ exports.agentSignupValidator = [
   body('phoneNumber')
     .trim(' ')
     .notEmpty()
-    .withMessage('Input a phone number into the office number field')
-    .escape(),
-  body('otherPhone')
-    .optional({ nullable: true })
-    .trim(' ')
-    .notEmpty()
+    .withMessage('Input a phone number into the phone number field')
     .isMobilePhone(['en-NG'], { strictMode: true })
     .withMessage('Input a standard phone number e.g +234 8012345678')
-    .custom((value, { req }) => value !== req.body.phoneNumber)
-    .withMessage(
-      'mobile number must not be the same as office number',
-    )
     .escape(),
   body('password')
     .trim(' ')

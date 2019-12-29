@@ -22,8 +22,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '+2347123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -64,8 +64,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: ' ',
+        phoneNumber: '+23407012345678',
+        otherPhone: ' ',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -91,8 +91,8 @@ describe('Server', () => {
         expect(result.status).toBe(expected);
       });
       it('fails to sign up agent with response message', () => {
-        const expected = 'mobileNumber';
-        expect(result.message.find((e) => e.param === 'mobileNumber').param).toBe(expected);
+        const expected = 'otherPhone';
+        expect(result.message.find((e) => e.param === 'otherPhone').param).toBe(expected);
       });
     });
 
@@ -102,8 +102,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '07123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -141,7 +141,7 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
+        phoneNumber: '+23407012345678',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -182,8 +182,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies',
-        officeNumber: '07012345678',
-        mobileNumber: '07123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -214,45 +214,6 @@ describe('Server', () => {
       });
     });
 
-    describe('with wrong office number format', () => {
-      agentSignupRequest = {
-        agentName: 'testName',
-        address: 'testAddress',
-        lga: 'testLGA',
-        state: 'testState',
-        email: 'testEmail@homies.com',
-        officeNumber: '0701234567',
-        mobileNumber: '07123456789',
-        password: 'testPassword',
-        confirmPassword: 'testPassword',
-      };
-      const options = {
-        method: 'POST',
-        body: agentSignupRequest,
-        json: true,
-      };
-
-      beforeAll((done) => {
-        request(uri, options, (error, response, body) => {
-          result.status = response.statusCode;
-          result.message = body.message;
-          done();
-        });
-      });
-      afterAll((done) => {
-        console.log('Test complete against wrong office number format');
-        done();
-      });
-      it('fails to sign up agent with response Status 422', () => {
-        const expected = 422;
-        expect(result.status).toBe(expected);
-      });
-      it('fails to sign up agent with response message', () => {
-        const expected = 'officeNumber';
-        expect(result.message.find((e) => e.param === 'officeNumber').param).toBe(expected);
-      });
-    });
-
     describe('with wrong mobile number format', () => {
       agentSignupRequest = {
         agentName: 'testName',
@@ -260,8 +221,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '071234567890',
+        phoneNumber: '+23407012345678',
+        otherPhone: '07123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -287,8 +248,8 @@ describe('Server', () => {
         expect(result.status).toBe(expected);
       });
       it('fails to sign up agent with response message', () => {
-        const expected = 'mobileNumber';
-        expect(result.message.find((e) => e.param === 'mobileNumber').param).toBe(expected);
+        const expected = 'otherPhone';
+        expect(result.message.find((e) => e.param === 'otherPhone').param).toBe(expected);
       });
     });
 
@@ -299,8 +260,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '07012345678',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+23407012345678',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -326,8 +287,8 @@ describe('Server', () => {
         expect(result.status).toBe(expected);
       });
       it('fails to sign up agent with response message', () => {
-        const expected = 'mobileNumber';
-        expect(result.message.find((e) => e.param === 'mobileNumber').param).toBe(expected);
+        const expected = 'otherPhone';
+        expect(result.message.find((e) => e.param === 'otherPhone').param).toBe(expected);
       });
     });
 
@@ -338,8 +299,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '07123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'test',
         confirmPassword: 'test',
       };
@@ -377,8 +338,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'testEmail@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '07123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'testPassword',
         confirmPassword: 'testPasswded',
       };
@@ -416,8 +377,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'try_email21@howmies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '07123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
@@ -448,6 +409,45 @@ describe('Server', () => {
       });
     });
 
+    describe('with already existing office/mobile number combination', () => {
+      agentSignupRequest = {
+        agentName: 'testName',
+        address: 'testAddress',
+        lga: 'testLGA',
+        state: 'testState',
+        email: 'testEmail@homies.com',
+        phoneNumber: '+2348123456781',
+        otherPhone: '+2348012345678',
+        password: 'testPassword',
+        confirmPassword: 'testPassword',
+      };
+      const options = {
+        method: 'POST',
+        body: agentSignupRequest,
+        json: true,
+      };
+
+      beforeAll((done) => {
+        request(uri, options, (error, response, body) => {
+          result.status = response.statusCode;
+          result.message = body.message;
+          done();
+        });
+      });
+      afterAll((done) => {
+        console.log('Test complete against already existing office/mobile number combination');
+        done();
+      });
+      it('fails to sign up agent with response Status 406', () => {
+        const expected = 406;
+        expect(result.status).toBe(expected);
+      });
+      it('fails to sign up agent with response message', () => {
+        const expected = 'Account already in use';
+        expect(result.message).toBe(expected);
+      });
+    });
+
     describe('with similar email of a property owner or client', () => {
       agentSignupRequest = {
         agentName: 'testName',
@@ -455,8 +455,8 @@ describe('Server', () => {
         lga: 'testLGA',
         state: 'testState',
         email: 'landlord@homies.com',
-        officeNumber: '07012345678',
-        mobileNumber: '07123456789',
+        phoneNumber: '+23407012345678',
+        otherPhone: '+2347123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };

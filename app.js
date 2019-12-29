@@ -5,6 +5,7 @@ const server = express();
 
 const AgentSignup = require('./routes/AgentSignup');
 const OwnerSignup = require('./routes/OwnerSignup');
+const ClientSignup = require('./routes/ClientSignup');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/auth/real_estate_agents', AgentSignup);
 app.use('/auth/property_owners', OwnerSignup);
+app.use('/auth/clients', ClientSignup);
 
 server.use('/api/v1', app);
 

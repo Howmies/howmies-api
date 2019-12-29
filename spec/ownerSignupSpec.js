@@ -13,21 +13,21 @@ describe('Server', () => {
   describe('POST /auth/property_owners/signup', () => {
     const result = {};
     const uri = 'http://localhost:3000/api/v1/auth/property_owners/signup';
-    let agentSignupRequest;
+    let ownerSignupRequest;
 
     describe('with all data in correct format', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
+        phoneNumber: '+2348012345678',
         otherPhone: '+2348123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -56,18 +56,18 @@ describe('Server', () => {
     });
 
     describe('with empty optional data', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
+        phoneNumber: '+2348012345678',
         otherPhone: ' ',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -93,17 +93,17 @@ describe('Server', () => {
     });
 
     describe('with empty or excluded required data', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         lastName: ' ',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '08123456789',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -129,17 +129,17 @@ describe('Server', () => {
     });
 
     describe('with excluded optional data', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
+        phoneNumber: '+2348012345678',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -168,18 +168,18 @@ describe('Server', () => {
     });
 
     describe('with wrong email format', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies',
-        phoneNumber: '08012345678',
-        otherPhone: '08123456789',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -205,18 +205,18 @@ describe('Server', () => {
     });
 
     describe('with wrong phone number format', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '0701234567',
-        otherPhone: '08123456789',
+        phoneNumber: '08012345678',
+        otherPhone: '+2348123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -241,19 +241,19 @@ describe('Server', () => {
       });
     });
 
-    describe('with wrong other phone number format', () => {
-      agentSignupRequest = {
+    describe('with wrong number format for other phone', () => {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '071234567890',
+        phoneNumber: '+2348012345678',
+        otherPhone: '08123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -265,7 +265,7 @@ describe('Server', () => {
         });
       });
       afterAll((done) => {
-        console.log('Test complete against wrong other phone number format');
+        console.log('Test complete against wrong number format for other phone');
         done();
       });
       it('fails to sign up property owner with response Status 422', () => {
@@ -279,18 +279,18 @@ describe('Server', () => {
     });
 
     describe('with other phone number similar to primary phone number', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '08012345678',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348012345678',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -316,18 +316,18 @@ describe('Server', () => {
     });
 
     describe('with wrong password format', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '08123456789',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348123456789',
         password: 'test',
         confirmPassword: 'test',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -353,18 +353,18 @@ describe('Server', () => {
     });
 
     describe('with dissimilar confirmation password', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'testOwnerEmail@homies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '08123456789',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348123456789',
         password: 'testPassword',
         confirmPassword: 'testPasswded',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -390,18 +390,18 @@ describe('Server', () => {
     });
 
     describe('with already existing email', () => {
-      agentSignupRequest = {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         email: 'landlord@homies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '08123456789',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348123456789',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
         json: true,
       };
 
@@ -426,19 +426,56 @@ describe('Server', () => {
       });
     });
 
-    describe('with similar email of a real estate agent', () => {
-      agentSignupRequest = {
+    describe('with already existing phone number', () => {
+      ownerSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
-        email: 'try_email21@howmies.com',
-        phoneNumber: '08012345678',
-        otherPhone: '08123456789',
+        email: 'testOwnerEmail@homies.com',
+        phoneNumber: '+2348023456789',
+        otherPhone: '+2348022345670',
         password: 'testPassword',
         confirmPassword: 'testPassword',
       };
       const options = {
         method: 'POST',
-        body: agentSignupRequest,
+        body: ownerSignupRequest,
+        json: true,
+      };
+
+      beforeAll((done) => {
+        request(uri, options, (error, response, body) => {
+          result.status = response.statusCode;
+          result.message = body.message;
+          done();
+        });
+      });
+      afterAll((done) => {
+        console.log('Test complete against already existing phone number');
+        done();
+      });
+      it('fails to sign up property owner with response Status 406', () => {
+        const expected = 406;
+        expect(result.status).toBe(expected);
+      });
+      it('fails to sign up property owner with response message', () => {
+        const expected = 'Account already in use';
+        expect(result.message).toBe(expected);
+      });
+    });
+
+    describe('with similar email of a real estate agent', () => {
+      ownerSignupRequest = {
+        firstName: 'testFirstName',
+        lastName: 'testLastName',
+        email: 'try_email21@howmies.com',
+        phoneNumber: '+2348012345678',
+        otherPhone: '+2348123456789',
+        password: 'testPassword',
+        confirmPassword: 'testPassword',
+      };
+      const options = {
+        method: 'POST',
+        body: ownerSignupRequest,
         json: true,
       };
 

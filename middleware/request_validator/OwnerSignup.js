@@ -22,22 +22,20 @@ exports.ownerSignupValidator = [
     .trim(' ')
     .notEmpty()
     .withMessage('Input a phone number into the phone number field')
-    .custom((value) => value.length === 11 || value.length === 14)
-    .withMessage(
-      'Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789',
-    )
+    .isMobilePhone(['en-NG'], { strictMode: true })
+    .withMessage('Input a standard phone number e.g +234 8012345678')
     .escape(),
   body('otherPhone')
     .optional({ nullable: true })
+    .trim(' ')
+    .notEmpty()
     .custom((value, { req }) => value !== req.body.phoneNumber)
     .withMessage(
       'other phone number must not be the same as primary phone number',
     )
-    .trim(' ')
-    .custom((value) => value.length === 11 || value.length === 14)
-    .withMessage(
-      'Ensure you are inputting a standard phone number e.g. 08123456789 or +2348123456789',
-    ),
+    .isMobilePhone(['en-NG'], { strictMode: true })
+    .withMessage('Input a standard phone number e.g +234 8012345678')
+    .escape(),
   body('password')
     .trim(' ')
     .notEmpty()
