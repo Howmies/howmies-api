@@ -3,9 +3,7 @@ const express = require('express');
 const app = express();
 const server = express();
 
-const AgentSignup = require('./routes/AgentSignup');
-const OwnerSignup = require('./routes/OwnerSignup');
-const ClientSignup = require('./routes/ClientSignup');
+const UserSignup = require('./routes/UserSignup');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,9 +15,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/auth/real_estate_agents', AgentSignup);
-app.use('/auth/property_owners', OwnerSignup);
-app.use('/auth/clients', ClientSignup);
+app.use('/auth/users', UserSignup);
 
 server.use('/api/v1', app);
 

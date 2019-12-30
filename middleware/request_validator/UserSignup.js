@@ -1,15 +1,19 @@
 const { body } = require('express-validator');
 
-exports.clientSignupValidator = [
+exports.userSignupValidator = [
   body('firstName')
     .trim(' ')
     .notEmpty()
     .withMessage('Input your first name')
+    .isLength({ max: 24 })
+    .withMessage('Too long')
     .escape(),
   body('lastName')
     .trim(' ')
     .notEmpty()
     .withMessage('Input your last name')
+    .isLength({ max: 24 })
+    .withMessage('Too long')
     .escape(),
   body('email')
     .trim(' ')
@@ -18,7 +22,7 @@ exports.clientSignupValidator = [
     .isEmail()
     .withMessage('Input correct email address')
     .normalizeEmail({ all_lowercase: true }),
-  body('phoneNumber')
+  body('phone')
     .trim(' ')
     .notEmpty()
     .withMessage('Input a phone number into the phone number field')
@@ -29,17 +33,6 @@ exports.clientSignupValidator = [
     .trim(' ')
     .notEmpty()
     .withMessage('Input a user password')
-    .isLength({ max: 24, min: 8 })
-    .withMessage('Password must be between 8 - 24 characters')
-    .escape(),
-  body('confirmPassword')
-    .custom((value, { req }) => value === req.body.password)
-    .withMessage(
-      'confirmation password must be the same as the password you entered',
-    )
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Confirm your user password')
     .isLength({ max: 24, min: 8 })
     .withMessage('Password must be between 8 - 24 characters')
     .escape(),
