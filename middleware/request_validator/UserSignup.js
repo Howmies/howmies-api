@@ -26,7 +26,7 @@ exports.userSignupValidator = [
     .trim(' ')
     .notEmpty()
     .withMessage('Input a phone number into the phone number field')
-    .isMobilePhone(['en-NG'], { strictMode: true })
+    .isMobilePhone(['en-NG'])
     .withMessage('Input a standard phone number e.g +234 8012345678')
     .escape(),
   body('password')
