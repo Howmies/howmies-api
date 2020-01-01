@@ -1,15 +1,18 @@
 const request = require('request');
 const pool = require('../elephantsql');
+const server = require('../server');
 
 describe('Server', () => {
-  let server;
+  beforeAll((done) => {
+    server.startServer();
+    done();
+  });
+  afterAll((done) => {
+    console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
+    server.closeServer();
+    done();
+  });
 
-  beforeAll(() => {
-    server = require('../server');
-  });
-  afterAll(() => {
-    server.close();
-  });
   describe('POST /auth/users/signup', () => {
     const result = {};
     const uri = 'http://localhost:3000/api/v1/auth/users/signup';
@@ -19,7 +22,7 @@ describe('Server', () => {
       userSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
-        email: 'testuserEmail@howmies.com',
+        email: 'testUserEmail@howmies.com',
         phone: '+2349012345678',
         password: 'testPassword',
       };
@@ -38,8 +41,8 @@ describe('Server', () => {
       });
       afterAll((done) => {
         pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
-          if (err) { return console.log(err.message); }
-          console.log('Test complete for fully correct format');
+          if (err) { return console.log(`Error deleting from database - ${err.message}`); }
+          console.log('Test complete for fully correct data format');
           done();
         });
       });
@@ -57,7 +60,7 @@ describe('Server', () => {
       userSignupRequest = {
         firstName: 'testFirstNametestFirstName',
         lastName: 'testLastName',
-        email: 'testuserEmail@howmies.com',
+        email: 'testUserEmail@howmies.com',
         phone: '+2349012345678',
         password: 'testPassword',
       };
@@ -91,7 +94,7 @@ describe('Server', () => {
     describe('with excluded required data', () => {
       userSignupRequest = {
         lastName: 'testLastName',
-        email: 'testuserEmail@howmies.com',
+        email: 'testUserEmail@howmies.com',
         phone: '+2349012345678',
         password: 'testPassword',
       };
@@ -126,7 +129,7 @@ describe('Server', () => {
       userSignupRequest = {
         firstName: 'testFirstName',
         lastName: ' ',
-        email: 'testuserEmail@howmies.com',
+        email: 'testUserEmail@howmies.com',
         phone: '+2349012345678',
         password: 'testPassword',
       };
@@ -196,7 +199,7 @@ describe('Server', () => {
       userSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
-        email: 'testuserEmail@howmies.com',
+        email: 'testUserEmail@howmies.com',
         phone: '+2349012345678',
         password: 'test',
       };
@@ -227,12 +230,12 @@ describe('Server', () => {
       });
     });
 
-    describe('with wrong phone number format', () => {
+    describe('with wrong phone number format e.g. for Nigeria', () => {
       userSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
-        email: 'testuserEmail@howmies.com',
-        phone: '09012345678',
+        email: 'testUserEmail@howmies.com',
+        phone: '190123456781',
         password: 'testPassword',
       };
       const options = {
@@ -301,7 +304,7 @@ describe('Server', () => {
       userSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
-        email: 'testuserEmail@howmies.com',
+        email: 'testUserEmail@howmies.com',
         phone: '+2348012345678',
         password: 'testPassword',
       };

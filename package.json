@@ -4,6 +4,7 @@
   "description": "The backend of the Howmies project owned by Matthew (ThankGod) Nte, partnering with me: Akanji Tobi (Tboy-AK).",
   "main": "server.js",
   "scripts": {
+    "dev": "nodemon server.js",
     "test": "jasmine"
   },
   "repository": {

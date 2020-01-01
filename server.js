@@ -44,4 +44,8 @@ server.on('listening', () => {
   console.log(`Listening on ${bind}`);
 });
 
-module.exports = server.listen(port);
+const startServer = () => server.listen(port);
+const closeServer = () => server.close();
+
+exports.startServer = startServer;
+exports.closeServer = closeServer;
