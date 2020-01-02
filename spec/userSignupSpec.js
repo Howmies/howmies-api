@@ -1,17 +1,22 @@
 const request = require('request');
 const pool = require('../elephantsql');
-const server = require('../server');
+const { server } = require('../server');
+const { port } = require('../server');
+const { listen } = require('../server');
 
 describe('Server', () => {
+  let service;
   beforeAll((done) => {
-    server.startServer();
+    listen.close();
+    service = server.listen(port);
     done();
   });
   afterAll((done) => {
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
-    server.closeServer();
+    service.close();
     done();
   });
+
 
   describe('POST /auth/users/signup', () => {
     const result = {};
