@@ -8,30 +8,16 @@ dotenv.config();
 
 if (dotenv.config().error) throw dotenv.config().error;
 
-const tokenKeys = {
-  keyPrivate: process.env.RSA_PRIVATE_KEY,
-  keyPublic: process.env.RSA_PUBLIC_KEY,
-};
-
-const salt = bcrypt.genSaltSync(10);
-
-const expiresIn = '20 minutes';
-
 exports.signup = (req, response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   const {
-    firstName,
-    lastName,
-    email,
-    phone,
-    password,
+    firstName, lastName, email, phone, password,
   } = req.body;
 
-  const passwordCrypt = bcrypt.hashSync(password, salt);
-  const token = jwt.sign({ email, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
-  const userRegDate = new Date();
+  const passwordCrypt = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+  const userRegDate = (new Date()).toUTCString();
 
   pool.query('INSERT INTO users(first_name, last_name, email, phone, password, register_date) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
     [firstName,
@@ -39,23 +25,31 @@ exports.signup = (req, response) => {
       email,
       phone,
       passwordCrypt,
-      userRegDate.toUTCString(),
+      userRegDate,
     ],
     (err, result) => {
       if (err) {
         return response.status(406).send({
           status: err.name,
-          message: (err.message.includes('getaddrinfo', 0)) ? 'Internal Server Error' : 'Account already in use',
-          data: {},
+          message: (err.message.includes('duplicate', 0)) ? 'Account already in use' : 'Internal Server Error',
         });
       }
 
-      response.status(200).set('Authorization', token).send({
-        message: 'Successfully signed up',
-        data: {
-          userID: result.rows.find((e) => e.email === email).user_id,
-          username: result.rows.find((e) => e.email === email).first_name,
-        },
+      jwt.sign({
+        uid: result.rows[0].user_id,
+        role: 'user',
+        iat: (new Date()).valueOf(),
+      }, process.env.RSA_PRIVATE_KEY, { expiresIn: 900 }, (errToken, token) => {
+        if (errToken) {
+          return response.status(500).send({
+            status: errToken.name,
+            message: errToken.message,
+          });
+        }
+
+        response.status(200).set('Authorization', token).send({
+          message: 'Successfully signed up',
+        });
       });
     });
 };

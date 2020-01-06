@@ -1,7 +1,5 @@
 const request = require('request');
-const { server } = require('../server');
-const { port } = require('../server');
-const { listen } = require('../server');
+const { server, port, listen } = require('../server');
 
 describe('Server', () => {
   let service;
@@ -16,9 +14,9 @@ describe('Server', () => {
     done();
   });
 
-  describe('POST /auth/users/login', () => {
+  describe('POST /auth/login', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v1/auth/users/login';
+    const uri = 'http://localhost:3000/api/v1/auth/login';
     let userLoginRequest;
 
     describe('with all data in correct format', () => {

@@ -1,8 +1,6 @@
 const request = require('request');
 const pool = require('../elephantsql');
-const { server } = require('../server');
-const { port } = require('../server');
-const { listen } = require('../server');
+const { server, port, listen } = require('../server');
 
 describe('Server', () => {
   let service;
@@ -18,9 +16,9 @@ describe('Server', () => {
   });
 
 
-  describe('POST /auth/users/signup', () => {
+  describe('POST /auth/signup', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v1/auth/users/signup';
+    const uri = 'http://localhost:3000/api/v1/auth/signup';
     let userSignupRequest;
 
     describe('with all data in correct format', () => {

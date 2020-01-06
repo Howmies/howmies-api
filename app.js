@@ -1,10 +1,10 @@
 const express = require('express');
 
 const app = express();
-const server = express();
 
 const UserSignup = require('./routes/UserSignup');
 const UserLogin = require('./routes/UserLogin');
+const PostProperty = require('./routes/PostProperty');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,9 +16,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/auth/users', UserSignup);
-app.use('/auth/users', UserLogin);
+app.use('/api/v1', [UserSignup, UserLogin, PostProperty]);
 
-server.use('/api/v1', app);
-
-module.exports = server;
+module.exports = app;

@@ -4,6 +4,6 @@ const validate = require('../middleware/request_validator/UserSignup');
 
 const router = express.Router();
 
-router.post('/signup', validate.userSignupValidator, UserSignup.signup);
+router.post('/auth/signup', validate.userSignupValidator, UserSignup.signup);
 
 module.exports = router;

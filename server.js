@@ -43,6 +43,11 @@ server.on('listening', () => {
   const bind = typeof address === 'string' ? `pipe ${address}` : `port ${port}`;
   console.log(`Listening on ${bind}`);
 });
+server.on('close', () => {
+  const address = server.address();
+  const bind = typeof address === 'string' ? `pipe ${address}` : `port ${port}`;
+  console.log(`Closing on ${bind}`);
+});
 
 exports.listen = server.listen(port);
 exports.server = server;
