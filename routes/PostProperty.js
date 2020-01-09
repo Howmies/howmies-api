@@ -1,9 +1,10 @@
 const express = require('express');
-const PostProperty = require('../controllers/PostProperty');
-const validate = require('../middleware/request_validator/PostProperty');
+const { postProperty } = require('../controllers/PostProperty');
+const { postPropertyValidator } = require('../middleware/request_validator/PostProperty');
+const { multerUploads } = require('../middleware/file_upload/multerSetup');
 
 const router = express.Router();
 
-router.post('/auth/login', validate.postPropertyValidator, PostProperty.postProperty);
+router.post('/properties', [postPropertyValidator, multerUploads], postProperty);
 
 module.exports = router;

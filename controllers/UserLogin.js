@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
-const pool = require('../elephantsql');
+const pool = require('../middleware/database/elephantsqlConfig');
 
 dotenv.config();
 
@@ -37,7 +37,7 @@ exports.login = (req, response) => {
         uid: result.rows[0].user_id,
         role: 'user',
         iat: (new Date()).valueOf(),
-      }, process.env.RSA_PRIVATE_KEY, { expiresIn: 900 }, (errToken, token) => {
+      }, process.env.RSA_PRIVATE_KEY, { expiresIn: 900, algorithm: 'HS256' }, (errToken, token) => {
         if (errToken) {
           return response.status(500).send({
             status: errToken.name,
