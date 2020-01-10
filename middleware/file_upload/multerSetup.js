@@ -19,7 +19,7 @@ exports.multerUploads = [
         && file.originalname.split('.')[1] !== 'JPG'
         && file.originalname.split('.')[1] !== 'JPEG'
         && file.originalname.split('.')[1] !== 'PNG') {
-        req.fileValidationError = {
+        req.imageValidationError = {
           name: 'error',
           message: 'Only non-gif images allowed',
         };

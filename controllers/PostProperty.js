@@ -10,33 +10,40 @@ if (dotenv.config().error) throw dotenv.config().error;
 
 cloudinaryConfig();
 
-exports.postProperty = (req, response) => {
-  const ownerID = () => jwt.verify(req.headers.Authorization, process.env.RSA_PRIVATE_KEY, { algorithms: 'HS256' },
-    (err, payload) => {
-      if (err) {
-        return response.status(403).send({
-          status: err.name,
-          message: 'Invalid access',
-        });
-      }
-
-      pool.query('SELECT user_id FROM users WHERE user_id=$1',
-        [payload.uid],
-        (errUser, result) => {
-          if (errUser || !result.rows || (result.rows && result.rows.length < 1)) {
-            return response.status(406).send({
-              status: errUser.name,
-              message: 'Invalid access',
-            });
-          }
-          return result.rows[0].user_id;
-        });
+exports.postProperty = async (req, response) => {
+  const { uid } = await jwt.decode(req.headers.authorization);
+  if (!uid) {
+    return response.status(403).send({
+      status: 'Error',
+      message: 'Invalid token access',
     });
+  }
+
+  const ownerID = await pool.query('SELECT user_id FROM users WHERE user_id=$1',
+    [uid],
+    (err, result) => {
+      if (err) {
+        response.status(403).send({
+          status: err.name,
+          message: err.message,
+        });
+        return;
+      }
+      console.log(result.rows[0].user_id);
+      return result.rows[0].user_id;
+    });
+    console.log(ownerID);
+  if (!ownerID) {
+    return response.status(403).send({
+      status: 'Error',
+      message: 'Invalid user access',
+    });
+  }
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
-  const imageValidationError = req.fileValidationError;
+  const { imageValidationError } = req;
   if (imageValidationError) {
     return response.status(422).send({
       status: imageValidationError.name,
@@ -52,6 +59,44 @@ exports.postProperty = (req, response) => {
     return response.status(400).send({
       status: 'Error',
       message: 'Input at least an image in png or jpg format',
+    });
+  }
+
+  const propertyType = await pool.query('SELECT property_type_name FROM property_types WHERE property_type_name=$1',
+    [type.toLowerCase()],
+    (err, result) => {
+      if (err) {
+        response.status(403).send({
+          status: err.name,
+          message: err.message,
+        });
+        return;
+      }
+      return result.rows[0].property_type_name;
+    });
+  if (!propertyType) {
+    return response.status(403).send({
+      status: 'Error',
+      message: 'Invalid property access',
+    });
+  }
+
+  const perPeriod = await pool.query('SELECT period_name FROM property_period WHERE period_name=$1',
+    [period.toLowerCase()],
+    (err, result) => {
+      if (err) {
+        response.status(500).send({
+          status: err.name,
+          message: err.message,
+        });
+        return;
+      }
+      return result.rows[0].period_name;
+    });
+  if (!perPeriod) {
+    return response.status(403).send({
+      status: 'Error',
+      message: 'Invalid period access',
     });
   }
 
@@ -106,47 +151,6 @@ exports.postProperty = (req, response) => {
       joinPropertyFeature(result.rows[0].feature_name, propertyID);
     });
 
-  const propertyType = () => pool.query('SELECT property_type_name FROM property_types WHERE property_type_name=$1',
-    [type.toLowerCase()],
-    (err, result) => {
-      if (err) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
-
-      if (!result.rows || (result.rows && result.rows.length < 1)) {
-        return response.status(403).send({
-          status: err.name,
-          message: 'Invalid access',
-          data: {},
-        });
-      }
-
-      return result.rows[0].property_type_name;
-    });
-
-  const perPeriod = () => pool.query('SELECT period_name FROM property_period WHERE period_name=$1',
-    [period.toLowerCase()],
-    (err, result) => {
-      if (err) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
-
-      if (!result.rows || (result.rows && result.rows.length < 1)) {
-        return response.status(403).send({
-          status: err.name,
-          message: 'Invalid access',
-        });
-      }
-
-      return result.rows[0].period_name;
-    });
-
   const viewPost = (propertyID) => pool.query('SELECT i.image_url, p.price, p.property_period, p.property_type, p.state, p.lga, p.address, p.property_description, pf.feature_name FROM properties AS p, images AS i, properties_features AS pf WHERE property_id=$1',
     [propertyID],
     (err, result) => {
@@ -175,14 +179,14 @@ exports.postProperty = (req, response) => {
 
   pool.query('INSERT INTO properties(owner_id,  property_type, state, lga, address, property_description, price, property_period, post_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING property_id',
     [
-      ownerID(),
-      propertyType(),
+      ownerID,
+      propertyType,
       state,
       lga,
       address,
       description,
       price,
-      perPeriod(),
+      perPeriod,
       (new Date()).toUTCString(),
     ],
     (err, result) => {
