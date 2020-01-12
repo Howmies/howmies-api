@@ -11,32 +11,22 @@ if (dotenv.config().error) throw dotenv.config().error;
 cloudinaryConfig();
 
 exports.postProperty = async (req, response) => {
-  const { uid } = await jwt.decode(req.headers.authorization);
+  const { uid } = jwt.decode(req.headers.authorization);
   if (!uid) {
     return response.status(403).send({
       status: 'Error',
-      message: 'Invalid token access',
+      message: 'Invalid session access',
     });
   }
 
-  const ownerID = await pool.query('SELECT user_id FROM users WHERE user_id=$1',
-    [uid],
-    (err, result) => {
-      if (err) {
-        response.status(403).send({
-          status: err.name,
-          message: err.message,
-        });
-        return;
-      }
-      console.log(result.rows[0].user_id);
-      return result.rows[0].user_id;
-    });
-    console.log(ownerID);
+  const ownerID = await pool.query('SELECT user_id FROM users WHERE user_id=$1', [uid])
+    .then((result) => result.rows[0].user_id)
+    .catch((err) => console.log(err));
+  console.log(`ownerID: ${ownerID}`);
   if (!ownerID) {
     return response.status(403).send({
       status: 'Error',
-      message: 'Invalid user access',
+      message: 'User not found',
     });
   }
 
@@ -63,40 +53,26 @@ exports.postProperty = async (req, response) => {
   }
 
   const propertyType = await pool.query('SELECT property_type_name FROM property_types WHERE property_type_name=$1',
-    [type.toLowerCase()],
-    (err, result) => {
-      if (err) {
-        response.status(403).send({
-          status: err.name,
-          message: err.message,
-        });
-        return;
-      }
-      return result.rows[0].property_type_name;
-    });
+    [type.toLowerCase()])
+    .then((result) => result.rows[0].property_type_name)
+    .catch((err) => console.log(err));
+  console.log(`propertyType: ${propertyType}`);
   if (!propertyType) {
     return response.status(403).send({
       status: 'Error',
-      message: 'Invalid property access',
+      message: 'Invalid property type',
     });
   }
 
   const perPeriod = await pool.query('SELECT period_name FROM property_period WHERE period_name=$1',
-    [period.toLowerCase()],
-    (err, result) => {
-      if (err) {
-        response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-        return;
-      }
-      return result.rows[0].period_name;
-    });
+    [period.toLowerCase()])
+    .then((result) => result.rows[0].period_name)
+    .catch((err) => console.log(err));
+  console.log(`perPeriod: ${perPeriod}`);
   if (!perPeriod) {
     return response.status(403).send({
       status: 'Error',
-      message: 'Invalid period access',
+      message: 'Invalid renewal period',
     });
   }
 
@@ -196,6 +172,8 @@ exports.postProperty = async (req, response) => {
           message: err.message,
         });
       }
+      console.log(`Properties Table: ${result.rows[0].property_id}`);
+      return response.send({ status: 'debugging', message: 'Checking for point of error' });
 
       for (let i = 0; i < images.length; i + 1) {
         toCloudinary(images[i], result.rows[0].property_id);
