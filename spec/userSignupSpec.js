@@ -1,5 +1,5 @@
 const request = require('request');
-const pool = require('../middleware/database/elephantsql');
+const pool = require('../middleware/database/elephantsqlConfig');
 const { server, port, listen } = require('../server');
 
 describe('Server', () => {

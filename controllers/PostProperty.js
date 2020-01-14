@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const path = require('path');
 const pool = require('../middleware/database/elephantsqlConfig');
 const { cloudinaryConfig, uploader } = require('../middleware/file_upload/cloudinaryConfig');
 
@@ -42,15 +43,8 @@ exports.postProperty = async (req, response) => {
   }
 
   const {
-    type, state, lga, address, price, period, images, description, features,
+    type, state, lga, address, images, price, period, description, features,
   } = req.body;
-
-  if (!images) {
-    return response.status(400).send({
-      status: 'Error',
-      message: 'Input at least an image in png or jpg format',
-    });
-  }
 
   const propertyType = await pool.query('SELECT property_type_name FROM property_types WHERE property_type_name=$1',
     [type.toLowerCase()])
@@ -76,84 +70,54 @@ exports.postProperty = async (req, response) => {
     });
   }
 
-  const addImage = (imageURL, propertyID) => pool.query('INSERT INTO images(image_url, property_id) VALUES($1, $2)',
+  const addImage = (imageURL, propertyID) => pool.query(
+    'INSERT INTO images(image_url, property_id) VALUES($1, $2)',
     [imageURL, propertyID],
-    (err) => {
-      if (err) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
-    });
+  )
+    .catch((err) => console.log(err));
 
-  const toCloudinary = (image, propertyID) => {
-    uploader.upload(image, {
-      folder: 'Howmies/Properties',
-      format: 'jpg',
-    }, (err, result) => {
-      if (err) {
-        return response.status(406).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
-      addImage(result.url, propertyID);
-    });
-  };
+  const toCloudinary = (image, propertyID) => uploader.upload(image, {
+    folder: 'Howmies/Properties',
+    format: 'jpg',
+  })
+    .then((result) => addImage(result.url, propertyID))
+    .catch((err) => console.log(err));
 
-  const joinPropertyFeature = (featureElement, propertyID) => pool.query('INSERT INTO properties_features(feature_name, property_id) VALUES($1, $2)',
+  const joinPropertyFeature = (featureElement, propertyID) => pool.query(
+    'INSERT INTO properties_features(feature_name, property_id) VALUES($1, $2)',
     [featureElement, propertyID],
-    (err) => {
-      if (err) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-          data: {},
-        });
-      }
-    });
+  )
+    .catch((err) => console.log(err));
 
-  const addFeature = (featureElement, propertyID) => pool.query('INSERT INTO features(feature_name) VALUES($1) RETURNING feature_name',
+  const addFeature = (featureElement, propertyID) => pool.query(
+    'INSERT INTO features(feature_name) VALUES($1) RETURNING feature_name',
     [featureElement],
-    (err, result) => {
-      if (err || !result.rows || (result.rows && result.rows.length < 1)) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
+  )
+    .then((result) => joinPropertyFeature(result.rows[0].feature_name, propertyID))
+    .catch((err) => console.log(err));
 
-      joinPropertyFeature(result.rows[0].feature_name, propertyID);
-    });
-
-  const viewPost = (propertyID) => pool.query('SELECT i.image_url, p.price, p.property_period, p.property_type, p.state, p.lga, p.address, p.property_description, pf.feature_name FROM properties AS p, images AS i, properties_features AS pf WHERE property_id=$1',
+  const viewPost = (propertyID) => pool.query(
+    'SELECT i.image_url, p.price, p.property_period, p.property_type, p.state, p.lga, p.address, p.property_description, pf.feature_name FROM properties AS p, images AS i, properties_features AS pf WHERE property_id=$1',
     [propertyID],
-    (err, result) => {
-      if (err || !result.rows || (result.rows && result.rows.length < 1)) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
+  )
+    .then((result) => response.status(200).send({
+      message: 'Property posted successfully',
+      data: {
+        imageURL: [].push(result.rows.forEach((e) => e.image_url)),
+        price: result.rows[0].price,
+        period: result.rows[0].property_period,
+        type: result.rows[0].property_type,
+        state: result.rows[0].state,
+        lga: result.rows[0].lga,
+        address: result.rows[0].address,
+        description: result.rows[0].property_description,
+        features: result.rows.forEach((e) => e.feature_name),
+      },
+    }))
+    .catch((err) => console.log(err));
 
-      return response.status(200).send({
-        message: 'Property posted successfully',
-        data: {
-          imageURL: result.rows.forEach((e) => e.image_url),
-          price: result.rows[0].price,
-          period: result.rows[0].property_period,
-          type: result.rows[0].property_type,
-          state: result.rows[0].state,
-          lga: result.rows[0].lga,
-          address: result.rows[0].address,
-          description: result.rows[0].property_description,
-          features: result.rows.forEach((e) => e.feature_name),
-        },
-      });
-    });
-
-  pool.query('INSERT INTO properties(owner_id,  property_type, state, lga, address, property_description, price, property_period, post_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING property_id',
+  await pool.query(
+    'INSERT INTO properties(owner_id,  property_type, state, lga, address, property_description, price, property_period, post_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING property_id',
     [
       ownerID,
       propertyType,
@@ -165,18 +129,10 @@ exports.postProperty = async (req, response) => {
       perPeriod,
       (new Date()).toUTCString(),
     ],
-    (err, result) => {
-      if (err) {
-        return response.status(500).send({
-          status: err.name,
-          message: err.message,
-        });
-      }
-      console.log(`Properties Table: ${result.rows[0].property_id}`);
-      return response.send({ status: 'debugging', message: 'Checking for point of error' });
-
-      for (let i = 0; i < images.length; i + 1) {
-        toCloudinary(images[i], result.rows[0].property_id);
+  )
+    .then((result) => {
+      for (let i = 0; i < images.length; i += 1) {
+        toCloudinary(path.resolve(__dirname, images[i]), result.rows[0].property_id);
       }
 
       if (features && features.length > 0) {
@@ -186,5 +142,11 @@ exports.postProperty = async (req, response) => {
       }
 
       viewPost(result.rows[0].property_id);
-    });
+      console.log(`Properties Table: ${result.rows[0].property_id}`);
+      return response.status(200).send({ status: 'debugging', message: 'Checking for point of error' });
+    })
+    .catch((err) => response.status(500).send({
+      status: err.name,
+      message: err.message,
+    }));
 };
