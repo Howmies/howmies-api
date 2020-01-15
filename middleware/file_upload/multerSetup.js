@@ -1,15 +1,24 @@
 const multer = require('multer');
 
 const storage = multer.memoryStorage();
+
 const fileFilter = (req, file, callback) => {
-  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+  const mimeType = file.originalname.split('.')[1];
+  if (
+    mimeType === 'jpg'
+    || mimeType === 'jpeg'
+    || mimeType === 'png'
+    || mimeType === 'JPG'
+    || mimeType === 'JPEG'
+    || mimeType === 'PNG'
+  ) {
     callback(null, true);
   } else {
-    req.imageValidationError = {
-      name: 'error',
-      message: 'Only non-gif images allowed',
+    req.imagesError = {
+      name: 'Error',
+      message: 'Unsupported file format',
     };
-    callback({ message: 'Unsupported file format' }, false);
+    callback(null, false);
   }
 };
 

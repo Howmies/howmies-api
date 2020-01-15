@@ -28,7 +28,7 @@ describe('Server', () => {
         lga: 'testLGA',
         address: 'testPropertyAddress',
         images: [
-          '/C:/Users/AKANJI OLUWATOBILOBA/Pictures/Reference images/Maya_Walle_Final_Preview.jpg',
+          '/C:/Users/AKANJI OLUWATOBILOBA/Pictures/Reference images/inec-logo1.gif',
           '/C:/Users/AKANJI OLUWATOBILOBA/Pictures/Reference images/wine-colors-excerpt.jpg',
         ],
         price: 1000,
