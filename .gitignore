@@ -1,4 +1,4 @@
 node_modules
 .env
 makefile
-spec/images
+spec/images/
