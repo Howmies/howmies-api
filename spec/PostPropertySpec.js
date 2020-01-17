@@ -1,4 +1,6 @@
 const request = require('request');
+const jwt = require('jsonwebtoken');
+const path = require('path');
 const pool = require('../middleware/database/elephantsqlConfig');
 const { server, port, listen } = require('../server');
 
@@ -20,29 +22,37 @@ describe('Server', () => {
     const uri = 'http://localhost:3000/api/v1/properties';
     let postPropertiesRequest;
     let authenticationToken;
+    let images;
 
     describe('without feature request', () => {
+      images = [
+        path.resolve(__dirname, './images/inec-logo1.gif'),
+        path.resolve(__dirname, './images/wine-colors-excerpt.jpg'),
+      ];
       postPropertiesRequest = {
         type: 'house',
         state: 'testState',
         lga: 'testLGA',
         address: 'testPropertyAddress',
-        images: [
-          '/C:/Users/AKANJI OLUWATOBILOBA/Pictures/Reference images/inec-logo1.gif',
-          '/C:/Users/AKANJI OLUWATOBILOBA/Pictures/Reference images/wine-colors-excerpt.jpg',
-        ],
         price: 1000,
         period: 'Monthly',
         description: 'testPropertyDescription',
+        images,
       };
       authenticationToken = {
         authorization:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjU0LCJyb2xlIjoidXNlciIsImlhdCI6MTU3ODUzODcwOTY1NCwiZXhwIjoxNTc4NTM4NzEwNTU0fQ.Ct-LWeQRDkGhoGxxFIR49gjIGO-dnFr30pBmMiju08o',
+          jwt.sign({
+            uid: 148,
+            role: 'user',
+            iat: (new Date()).valueOf(),
+          },
+          process.env.RSA_PRIVATE_KEY,
+          { expiresIn: 900, algorithm: 'HS256' }),
       };
       const options = {
         method: 'POST',
         headers: authenticationToken,
-        body: postPropertiesRequest,
+        body: [postPropertiesRequest, images],
         json: true,
       };
 

@@ -24,8 +24,13 @@ const fileFilter = (req, file, callback) => {
 
 const limits = { fileSize: 1000000 };
 
-exports.multerUploads = multer({
+exports.imageUploads = multer({
   storage,
   fileFilter,
   limits,
 }).array('images', 10);
+
+exports.textUploads = (req, response, next) => {
+  multer().none();
+  next();
+};

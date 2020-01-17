@@ -16,6 +16,10 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/v1', [UserSignup, UserLogin, PostProperty]);
+app.use('/api/v1', [
+  UserSignup,
+  UserLogin,
+  PostProperty,
+]);
 
 module.exports = app;

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const path = require('path');
 const pool = require('../middleware/database/elephantsqlConfig');
-const { multerUploads } = require('../middleware/file_upload/multerSetup');
+const { imageUploads } = require('../middleware/file_upload/multerSetup');
 const { cloudinaryConfig, uploader } = require('../middleware/file_upload/cloudinaryConfig');
 
 dotenv.config();
@@ -13,32 +13,72 @@ if (dotenv.config().error) throw dotenv.config().error;
 cloudinaryConfig();
 
 exports.postProperty = async (req, response) => {
-  // verify user
-  const { uid } = jwt.decode(req.headers.authorization);
-  if (!uid) {
+  // verify session
+  const user = await jwt.verify(
+    req.headers.authorization,
+    process.env.RSA_PRIVATE_KEY,
+    { algorithms: ['HS256'] },
+    (err, result) => {
+      if (err) {
+        console.log({
+          status: err.name,
+          message: err.message,
+        });
+        return;
+      }
+      const expiration = (Math.floor(result.exp / 1000) + (60 * 15))
+        - Math.floor(Date.now() / 1000);
+      if (expiration < 1) {
+        console.log({
+          status: 'tokenExpError',
+          message: `Expired session at ${expiration}s ago`,
+        });
+      } else {
+        console.log({
+          uid: result.uid,
+          exp: `Session until ${expiration}s`,
+        });
+        return result;
+      }
+    },
+  );
+
+  if (!user || !user.uid || !user.role) {
     return response.status(403).send({
       status: 'Error',
       message: 'Invalid session access',
     });
   }
 
-  const ownerID = await pool.query('SELECT user_id FROM users WHERE user_id=$1', [uid])
-    .then((result) => result.rows[0].user_id)
-    .catch((err) => console.log(err));
-  console.log(`ownerID: ${ownerID}`);
-  if (!ownerID) {
+  const { uid } = user;
+  const { role } = user;
+
+  if (role !== 'user') {
     return response.status(403).send({
       status: 'Error',
-      message: 'User not found',
+      message: 'Unauthorized request. Login or Sign up to continue.',
     });
   }
 
-  // verify user input
+  // verify user
+  const ownerID = await pool.query('SELECT user_id FROM users WHERE user_id=$1', [uid])
+    .then((result) => result.rows[0].user_id)
+    .catch((err) => console.log(err));
+
+  if (!ownerID) {
+    return response.status(403).send({
+      status: 'Error',
+      message: 'Could not validate user. Login or Sign up to continue.',
+    });
+  }
+
+  // verify property listing input by user
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
-  // verify successfully read image
-  multerUploads(req, response, (err) => {
+  // verify images
+  imageUploads(req, response, (err) => {
     if (req.imagesError) console.log(req.imagesError);
     if (err) console.log(err);
   });
@@ -46,7 +86,7 @@ exports.postProperty = async (req, response) => {
   if (!req.files) {
     return response.status(403).send({
       status: 'Error',
-      message: 'Ensure your images are jpg, jpeg or png',
+      message: 'Ensure your images are jpg, jpeg or png.',
     });
   }
 
@@ -60,7 +100,6 @@ exports.postProperty = async (req, response) => {
     [type.toLowerCase()])
     .then((result) => result.rows[0].property_type_name)
     .catch((err) => console.log(err));
-  console.log(`propertyType: ${propertyType}`);
   if (!propertyType) {
     return response.status(403).send({
       status: 'Error',
