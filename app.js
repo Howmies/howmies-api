@@ -5,6 +5,7 @@ const server = express();
 
 const UserSignup = require('./routes/UserSignup');
 const UserLogin = require('./routes/UserLogin');
+const PropertyHunt = require('./routes/PropertyHunt');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,8 +17,8 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/auth/users', UserSignup);
-app.use('/auth/users', UserLogin);
+app.use('/auth/users', [UserSignup, UserLogin]);
+app.use('', PropertyHunt);
 
 server.use('/api/v1', app);
 
