@@ -13,64 +13,119 @@ exports.hunt = async (req, response) => {
 
   if (features && features.length > 0) {
     const results = [];
-    results.push(
-      features.forEach(async (feature) => {
-        if (location && type) {
-          await pool.query(
-            'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) AND p.property_type=$2 AND pf.feature_name=$3 ORDER BY post_date DESC OFFSET $4 LIMIT 10',
-            [location, type, feature, pagination],
-            (err, result) => {
-              if (err) {
-                console.log({
-                  status: err.name,
-                  message: err.message,
-                });
-                return 'Internal server error';
-              }
-              if (result.rows.length > 0) {
-                return result.rows.forEach((e) => e);
-              }
-            },
-          );
-        } else if (!type && location) {
-          await pool.query(
-            'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) AND pf.feature_name=$2 ORDER BY post_date DESC OFFSET $3 LIMIT 10',
-            [location, feature, pagination],
-            (err, result) => {
-              if (err) {
-                console.log({
-                  status: err.name,
-                  message: err.message,
-                });
-                return 'Internal server error';
-              }
-              if (result.rows.length > 0) {
-                return result.rows.forEach((e) => e);
-              }
-            },
-          );
-        } else if (!location && type) {
-          await pool.query(
-            'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND p.property_type=$1 AND pf.feature_name=$2 ORDER BY post_date DESC OFFSET $3 LIMIT 10',
-            [type, feature, pagination],
-            (err, result) => {
-              if (err) {
-                console.log({
-                  status: err.name,
-                  message: err.message,
-                });
-                return 'Internal server error';
-              }
-              if (result.rows.length > 0) {
-                return result.rows.forEach((e) => e);
-              }
-            },
-          );
-        }
-      }),
-    );
+    if (location && type) {
+      return pool.query(
+        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) AND p.property_type=$2 ORDER BY post_date DESC OFFSET $3 LIMIT 10',
+        [location, type, pagination],
+        (err, result) => {
+          if (err) {
+            console.log({
+              status: err.name,
+              message: err.message,
+            });
+            return response.status(500).send({
+              status: 'Error',
+              message: 'Internal server error',
+            });
+          }
+          if (result.rows.length > 0) {
+            const featureResult = [];
+            for (let i = 0; i < features.length; i += 0) {
+              featureResult.push(result.rows.filter((e) => e.feature_name === features[i]));
+            }
+            if (featureResult.length > 0) {
+              return response.status(200).send({
+                status: 'Success',
+                message: 'Property is available',
+                data: {
+                  properties: featureResult,
+                },
+              });
+            }
+          }
+          return response.status(200).send({
+            status: 'Empty',
+            message: 'No property available',
+          });
+        },
+      );
+    }
+    if (!type && location) {
+      return pool.query(
+        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) ORDER BY post_date DESC OFFSET $2 LIMIT 10',
+        [location, pagination],
+        (err, result) => {
+          if (err) {
+            console.log({
+              status: err.name,
+              message: err.message,
+            });
+            return response.status(500).send({
+              status: 'Error',
+              message: 'Internal server error',
+            });
+          }
+          if (result.rows.length > 0) {
+            const featureResult = [];
+            for (let i = 0; i < features.length; i += 0) {
+              featureResult.push(result.rows.filter((e) => e.feature_name === features[i]));
+            }
+            if (featureResult.length > 0) {
+              return response.status(200).send({
+                status: 'Success',
+                message: 'Property is available',
+                data: {
+                  properties: featureResult,
+                },
+              });
+            }
+          }
+          return response.status(200).send({
+            status: 'Empty',
+            message: 'No property available',
+          });
+        },
+      );
+    }
+    if (!location && type) {
+      return pool.query(
+        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND p.property_type=$1 ORDER BY post_date DESC OFFSET $2 LIMIT 10',
+        [type, pagination],
+        (err, result) => {
+          if (err) {
+            console.log({
+              status: err.name,
+              message: err.message,
+            });
+            return response.status(500).send({
+              status: 'Error',
+              message: 'Internal server error',
+            });
+          }
+          if (result.rows.length > 0) {
+            const featureResult = [];
+            for (let i = 0; i < features.length; i += 0) {
+              featureResult.push(result.rows.filter((e) => e.feature_name === features[i]));
+            }
+            if (featureResult.length > 0) {
+              return response.status(200).send({
+                status: 'Success',
+                message: 'Property is available',
+                data: {
+                  properties: featureResult,
+                },
+              });
+            }
+          }
+          return response.status(200).send({
+            status: 'Empty',
+            message: 'No property available',
+          });
+        },
+      );
+    }
 
-    if (results.includes('Internal server error')) {
+    if (results.find((e) => e === 'Internal server error') === 'Internal server error') {
       return response.status(500).send({
         status: 'Error',
         message: 'Internal server error',
