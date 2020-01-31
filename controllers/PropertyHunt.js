@@ -15,7 +15,7 @@ exports.hunt = async (req, response) => {
     const results = [];
     if (location && type) {
       return pool.query(
-        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) AND p.property_type=$2 ORDER BY post_date DESC OFFSET $3 LIMIT 10',
+        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) AND p.property_type=$2 ORDER BY p.property_id DESC OFFSET $3 LIMIT 10',
         [location, type, pagination],
         (err, result) => {
           if (err) {
@@ -52,7 +52,7 @@ exports.hunt = async (req, response) => {
     }
     if (!type && location) {
       return pool.query(
-        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) ORDER BY post_date DESC OFFSET $2 LIMIT 10',
+        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND (p.state=$1 OR p.lga=$1) ORDER BY p.property_id DESC OFFSET $2 LIMIT 10',
         [location, pagination],
         (err, result) => {
           if (err) {
@@ -89,7 +89,7 @@ exports.hunt = async (req, response) => {
     }
     if (!location && type) {
       return pool.query(
-        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND p.property_type=$1 ORDER BY post_date DESC OFFSET $2 LIMIT 10',
+        'SELECT * from properties AS p, properties_features AS pf WHERE p.property_id=pf.property_id AND p.property_type=$1 ORDER BY p.property_id DESC OFFSET $2 LIMIT 10',
         [type, pagination],
         (err, result) => {
           if (err) {
@@ -148,7 +148,7 @@ exports.hunt = async (req, response) => {
 
   if (location && type) {
     pool.query(
-      'SELECT * from properties WHERE (state=$1 OR lga=$1) AND property_type=$2 ORDER BY post_date DESC OFFSET $3 LIMIT 10',
+      'SELECT * from properties WHERE (state=$1 OR lga=$1) AND property_type=$2 ORDER BY property_id DESC OFFSET $3 LIMIT 10',
       [location, type, pagination],
       (err, result) => {
         if (err) {
@@ -178,7 +178,7 @@ exports.hunt = async (req, response) => {
     );
   } else if (!type && location) {
     pool.query(
-      'SELECT * from properties WHERE state=$1 OR lga=$1 ORDER BY post_date DESC OFFSET $2 LIMIT 10',
+      'SELECT * from properties WHERE state=$1 OR lga=$1 ORDER BY property_id DESC OFFSET $2 LIMIT 10',
       [location, pagination],
       (err, result) => {
         if (err) {
@@ -208,7 +208,7 @@ exports.hunt = async (req, response) => {
     );
   } else if (!location && type) {
     pool.query(
-      'SELECT * from properties WHERE property_type=$1 ORDER BY post_date DESC OFFSET $2 LIMIT 10',
+      'SELECT * from properties WHERE property_type=$1 ORDER BY property_id DESC OFFSET $2 LIMIT 10',
       [type, pagination],
       (err, result) => {
         if (err) {
