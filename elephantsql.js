@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 
 dotenv.config();
 
-if (dotenv.config().error) throw dotenv.config().error;
+if (dotenv.config().error) console.log(dotenv.config().error);
 
 const conObj = {
   user: process.env.DB_USER,
