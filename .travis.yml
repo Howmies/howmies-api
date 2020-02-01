@@ -11,6 +11,6 @@ script:
 
 deploy:
   skip-cleanup: true
-  github-token: GITHUB-TOKEN
+  github-token: $GITHUB-TOKEN
   on:
     branch: ch-travis-ci-#22
