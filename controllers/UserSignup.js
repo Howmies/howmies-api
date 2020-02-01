@@ -6,8 +6,6 @@ const pool = require('../elephantsql');
 
 dotenv.config();
 
-if (dotenv.config().error) throw dotenv.config().error;
-
 const tokenKeys = {
   keyPrivate: process.env.RSA_PRIVATE_KEY,
   keyPublic: process.env.RSA_PUBLIC_KEY,
