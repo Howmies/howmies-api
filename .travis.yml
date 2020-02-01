@@ -17,4 +17,4 @@ deploy:
   app: howmies-api
   provider: heroku
   api_key:
-    secure: HEROKU-TOKEN
+    secure: HEROKU_TOKEN
