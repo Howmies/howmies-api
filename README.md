@@ -1,1 +1,1 @@
-# Howmies-api
+# howmies-api
