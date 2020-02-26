@@ -1,8 +1,6 @@
 const request = require('request');
 const pool = require('../elephantsql');
-const { server } = require('../server');
-const { port } = require('../server');
-const { listen } = require('../server');
+const { server, port, listen } = require('../server');
 
 describe('Server', () => {
   let service;

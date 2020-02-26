@@ -41,7 +41,6 @@ exports.login = (req, response) => {
         return response.status(406).send({
           status: 'Error',
           message: 'Incorrect email or password',
-          data: {},
         });
       }
 

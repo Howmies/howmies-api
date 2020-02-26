@@ -44,7 +44,6 @@ exports.signup = (req, response) => {
         return response.status(406).send({
           status: err.name,
           message: (err.message.includes('getaddrinfo', 0)) ? 'Internal Server Error' : 'Account already in use',
-          data: {},
         });
       }
 
