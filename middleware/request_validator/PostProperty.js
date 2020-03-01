@@ -58,12 +58,17 @@ module.exports = [
     .isLength({ max: 128 })
     .withMessage('Too long')
     .escape(),
-  body('features.*')
+  body('features')
     .optional()
+    .toArray(),
+  body('features.*')
+    .if(body('features').not().isArray())
+    .toArray()
+    .if(body('features').isArray())
     .trim(' ')
     .notEmpty()
     .withMessage('Don\'t submit an empty description')
-    .isLength({ max: 16 })
+    .isLength({ max: 32 })
     .withMessage('Too long')
     .escape(),
   body('email')
