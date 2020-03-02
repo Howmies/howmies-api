@@ -1,6 +1,6 @@
 const express = require('express');
-const postPropertyValidator = require('../../middleware/request_validator/PostProperty');
-const postProperty = require('../../controllers/PostProperty');
+const postPropertyValidator = require('../middleware/request_validator/PostProperty');
+const postProperty = require('../controllers/PostProperty');
 
 const router = express.Router();
 

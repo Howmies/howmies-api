@@ -257,6 +257,7 @@ module.exports = async (req, res) => {
     [pID],
   )
     .then((result) => ({
+      pid: pID,
       contactDetails: {
         phone: result.rows[0].p_phone,
         email: result.rows[0].p_email,

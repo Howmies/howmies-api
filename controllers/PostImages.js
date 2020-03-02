@@ -1,5 +1,6 @@
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
+const { dataURI } = require('../middleware/file_upload/multerConfig');
 const pool = require('../elephantsql');
 const { cloudinaryConfig, uploader } = require('../middleware/file_upload/cloudinaryConfig');
 
@@ -9,7 +10,7 @@ if (dotenv.config().error) throw dotenv.config().error;
 
 cloudinaryConfig();
 
-exports.postProperty = async (req, response) => {
+exports.postImages = async (req, res) => {
   // verify session
   const user = await jwt.verify(
     req.headers.authorization,
@@ -17,41 +18,33 @@ exports.postProperty = async (req, response) => {
     { algorithms: ['HS256'] },
     (err, result) => {
       if (err) {
-        console.log({
+        return console.log({
           status: err.name,
           message: err.message,
         });
-        return;
       }
-      const expiration = (Math.floor(result.exp / 1000) + (60 * 15))
-        - Math.floor(Date.now() / 1000);
-      if (expiration < 1) {
-        console.log({
-          status: 'tokenExpError',
-          message: `Expired session at ${expiration}s ago`,
-        });
-      } else {
-        console.log({
-          uid: result.uid,
-          exp: `Session until ${expiration}s`,
-        });
+
+      const expiration = Math.floor(result.exp - Date.now() / 1000);
+
+      if (expiration < 1) console.log(`Expired session at ${expiration}s ago`);
+      else {
+        console.log(`Session until ${expiration}s`);
         return result;
       }
     },
   );
 
-  if (!user || !user.uid || !user.role) {
-    return response.status(403).send({
+  if (!user || !user.role || !user.uid) {
+    return res.status(403).send({
       status: 'Error',
       message: 'Invalid session access',
     });
   }
 
-  const { uid } = user;
-  const { role } = user;
+  const { uid, role } = user;
 
   if (role !== 'user') {
-    return response.status(403).send({
+    return res.status(403).send({
       status: 'Error',
       message: 'Unauthorized request. Login or Sign up to continue.',
     });
@@ -63,7 +56,7 @@ exports.postProperty = async (req, response) => {
     .catch((err) => console.log(err));
 
   if (!ownerID) {
-    return response.status(403).send({
+    return res.status(403).send({
       status: 'Error',
       message: 'Could not validate user. Login or Sign up to continue.',
     });
@@ -71,80 +64,91 @@ exports.postProperty = async (req, response) => {
 
   // verify images
   if (req.imagesError) {
-    console.log(req.imagesError);
-  }
-
-  if (!req.files) {
-    console.log('Ensure your images are jpg, jpeg or png');
-    return response.status(403).send({
+    console.log(`Error: Multer upload error: ${req.imagesError.message}`);
+    return res.status(403).send({
       status: 'Error',
       message: 'Ensure your images are jpg, jpeg or png',
     });
   }
 
-  // save property images
-  const pID = req.params.property_id;
+  // verify database image count
+  const pID = req.params.pid;
   const images = req.files;
-  let imgURLs = [];
-  let uploadErr = [];
-  let savedImgs = [];
+
+  const imgCount = await pool.query(
+    'SELECT COUNT(property_id) FROM images WHERE property_id=$1',
+    [pID],
+  )
+    .then((result) => parseInt(result.rows[0].count, 10))
+    .catch((err) => console.log(err));
+
+  if (!imgCount) {
+    return res.status(500).send({});
+  }
+
+  if (imgCount + images.length > 10) {
+    return res.status(400).send({
+      status: 'Warning',
+      message: 'You have exceeded the images limit. Maximum of 10',
+    });
+  }
 
   // to Cloudinary
-  images.forEach((image) => {
-    uploader.upload(image, {
-      folder: 'Howmies/Properties',
-      format: 'jpg',
-    })
-      .then((result) => {
-        imgURLs.push(result.url);
-      })
-      .catch((err) => {
-        uploadErr.push(err);
+
+  const imgPromise = await images.map(async (image) => {
+    const imageBody = dataURI(image).content;
+    try {
+      const result = await uploader.upload(imageBody, {
+        folder: `howmies/properties/${pID}`,
+        format: 'jpg',
       });
+      return result.url;
+    } catch (err) {
+      console.log(err);
+    }
   });
 
-  if (uploadErr.length > 0) {
-    console.log(uploadErr[0]);
-    return response.status(500).send({
+  const imgURLs = await Promise.all(imgPromise).catch((err) => console.log(err));
+
+  if (!imgURLs) {
+    return res.status(500).send({
       status: 'Error',
       message: 'Error uploading file',
     });
   }
 
-  uploadErr = [];
+  // insert image URLs to database
+  const insertArr = (imgURLs.length > 0) ? () => {
+    let text = '';
+    for (let i = 0; i < imgURLs.length; i += 1) {
+      if (i === imgURLs.length - 1) {
+        text += `('${imgURLs[i]}', ${pID})`;
+      } else {
+        text += `('${imgURLs[i]}', ${pID}), `;
+      }
+    }
+    return text;
+  } : null;
 
-  // to database
-  imgURLs.forEach((imgURL) => {
-    pool.query(
-      'INSERT INTO images(image_url, property_id) VALUES($1, $2)',
-      [imgURL, pID],
-    )
-      .then((result) => {
-        savedImgs.push(result.rows[0].image_url);
-      })
-      .catch((err) => {
-        uploadErr.push(err.message);
-      });
-  });
+  const savedImgs = (insertArr) ? await pool.query(
+    `INSERT INTO images(image_url, property_id)
+      VALUES${insertArr()}
+    RETURNING *;`,
+  )
+    .then((result) => result.rows)
+    .catch((err) => console.log(`Error: Error inserting feature id: ${err}`))
+    : null;
 
-  if (uploadErr.length > 0) {
-    console.log(uploadErr);
-    return response.status(500).send({
-      status: 'Error',
-      message: 'Internal server file error',
-    });
-  }
-
-  uploadErr = [];
-
-  if (savedImgs.length > 0) {
-    console.log(savedImgs);
-    response.status(500).send({
+  if (savedImgs && savedImgs.length > 0) {
+    res.status(200).send({
       status: 'Success',
-      message: savedImgs,
+      message: 'Image upload succesful',
+      data: savedImgs,
+    });
+  } else {
+    res.status(500).send({
+      status: 'Error',
+      message: 'No images for this post',
     });
   }
-
-  imgURLs = [];
-  savedImgs = [];
 };

@@ -5,9 +5,8 @@ const server = express();
 
 const UserSignup = require('./routes/UserSignup');
 const UserLogin = require('./routes/UserLogin');
-const PostProperty = require('./routes/post_properties/PostProperty');
-// const multer = require('./middleware/file_upload/multerConfig');
-// const PostImages = require('./routes/post_properties/PostImages');
+const PostProperty = require('./routes/PostProperty');
+const PostImages = require('./routes/PostImages');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,12 +15,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use('/auth/users', [UserSignup, UserLogin]);
 app.use('/auth', PostProperty);
-// app.use('/auth/users/:property_id', multer, PostImages);
+app.use('/auth', PostImages);
 
 server.use('/api/v1', app);
 
