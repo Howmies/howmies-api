@@ -22,6 +22,6 @@ app.use('/auth/users', [UserSignup, UserLogin]);
 app.use('/auth', PostProperty);
 app.use('/auth', PostImages);
 
-server.use('/api/v1', app);
+server.use('/api/v0.0.1', app);
 
 module.exports = server;
