@@ -13,16 +13,11 @@ const tokenKeys = {
 
 const salt = bcrypt.genSaltSync(10);
 
-const expiresIn = '20 minutes';
-
 exports.login = (req, response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   const { email, password } = req.body;
-
-  const passwordCrypt = bcrypt.hashSync(password, salt);
-  const token = jwt.sign({ email, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
 
   pool.query('SELECT * FROM users WHERE email=$1',
     [email],
@@ -41,14 +36,19 @@ exports.login = (req, response) => {
         return response.status(406).send({
           status: 'Error',
           message: 'Incorrect email or password',
-          data: {},
         });
       }
+
+      const expiresIn = '1h';
+      const passwordCrypt = bcrypt.hashSync(password, salt);
+      const uid = result.rows[0].user_id;
+      const role = 'user';
+      const token = jwt.sign({ role, uid, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
 
       response.status(200).set('Authorization', token).send({
         message: 'Successfully signed up',
         data: {
-          userID: result.rows[0].user_id,
+          uid,
           username: result.rows[0].first_name,
         },
       });
