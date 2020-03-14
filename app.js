@@ -18,10 +18,13 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const checkAPI = (resMessage = 'OK!') => express.Router().get('/', (req, res) => res.send({ message: resMessage }));
+
 app.use('/auth/users', [UserSignup, UserLogin]);
 app.use('/auth', PostProperty);
 app.use('/auth', PostImages);
 
-server.use('/api/v0.0.1', app);
+server.use(checkAPI('OK! Howmies'));
+server.use('/api/v0.0.1', [checkAPI('Welcome! Howmies'), app]);
 
 module.exports = server;
