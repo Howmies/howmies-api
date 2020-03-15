@@ -4,6 +4,6 @@ const postProperty = require('../controllers/PostProperty');
 
 const router = express.Router();
 
-router.post('/properties', postPropertyValidator, postProperty);
+router.post('/', postPropertyValidator, postProperty);
 
 module.exports = router;
