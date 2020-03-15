@@ -16,7 +16,7 @@ describe('Server', () => {
 
   describe('GET /', () => {
     const result = {};
-    const uri = 'http://localhost:3000/';
+    const uri = 'http://localhost:3000/api';
 
     describe('development root url', () => {
       const options = {

@@ -4,6 +4,6 @@ const { postImages } = require('../controllers/PostImages');
 
 const router = express.Router();
 
-router.post('/properties/:pid/images', multerUpload, postImages);
+router.post('/:pid/images', multerUpload, postImages);
 
 module.exports = router;
