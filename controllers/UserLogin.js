@@ -11,46 +11,99 @@ const tokenKeys = {
   keyPublic: process.env.RSA_PUBLIC_KEY,
 };
 
-const salt = bcrypt.genSaltSync(10);
-
-exports.login = (req, response) => {
+module.exports = async (req, response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   const { email, password } = req.body;
 
-  pool.query('SELECT * FROM users WHERE email=$1',
-    [email],
-    (err, result) => {
-      if (err) {
-        return response.status(500).send({
-          status: err.name,
-          message: 'Internal Server Error',
-          data: {},
-        });
+  const user = await pool.query('SELECT * FROM users WHERE email=$1',
+    [email])
+    .then((result) => {
+      if (result.rows
+        && result.rows.length > 0
+        && bcrypt.compareSync(password, result.rows.find((e) => e.email === email).password)) {
+        return {
+          data: {
+            uid: result.rows[0].user_id,
+            name: `${result.rows[0].first_name} ${result.rows[0].last_name}`,
+            telephone: result.rows[0].phone,
+            emailAddress: result.rows[0].email,
+          },
+        };
       }
+    })
+    .catch(() => ({ error: 'Internal Server Error. Try again' }));
 
-      if (!result.rows
-        || (result.rows.length < 1)
-        || !bcrypt.compareSync(password, result.rows.find((e) => e.email === email).password)) {
-        return response.status(406).send({
-          status: 'Error',
-          message: 'Incorrect email or password',
-        });
-      }
-
-      const expiresIn = '1h';
-      const passwordCrypt = bcrypt.hashSync(password, salt);
-      const uid = result.rows[0].user_id;
-      const role = 'user';
-      const token = jwt.sign({ role, uid, passwordCrypt }, tokenKeys.keyPrivate, { expiresIn });
-
-      response.status(200).set('Authorization', token).send({
-        message: 'Successfully signed up',
-        data: {
-          uid,
-          username: result.rows[0].first_name,
-        },
-      });
+  if (user.error) {
+    return response.status(500).send({
+      status: 'Error',
+      message: user.error,
     });
+  }
+
+  if (!user) {
+    return response.status(406).send({
+      status: 'Error',
+      message: 'Incorrect email or password',
+    });
+  }
+
+  const {
+    uid, name, telephone, emailAddress,
+  } = user.data;
+
+  // sign token
+  const expiresIn = 1500;
+  const exp = Math.floor((Date.now() / 1000) + (60 * 60 * 24 * 30));
+  const aud = 'user';
+  const iss = 'Howmies Entreprise';
+  const data = 'refresh user';
+  const algorithm = 'HS256';
+
+  const accessToken = jwt.sign(
+    {
+      iss, aud, uid,
+    },
+    tokenKeys.keyPrivate,
+    { expiresIn, algorithm },
+  );
+  const refreshToken = jwt.sign(
+    { exp, data },
+    tokenKeys.keyPrivate,
+    { algorithm, issuer: iss, audience: aud },
+  );
+
+  const loggedUser = await pool.query(
+    'INSERT INTO logged_users(user_id, refresh_token) VALUES($1, $2)',
+    [uid, refreshToken],
+  )
+    .then(() => null)
+    .catch((err) => {
+      if (!err) {
+        return { error: 'Internal Server Error' };
+      }
+    });
+
+  if (loggedUser && loggedUser.error) {
+    return response.status(406).send({
+      status: 'Error',
+      message: loggedUser.error,
+    });
+  }
+
+  response.status(200).set({
+    Authorization: accessToken,
+    RefreshToken: refreshToken,
+  }).send({
+    message: 'Successfully signed in',
+    data: {
+      uid,
+      name,
+      telephone,
+      emailAddress,
+      expiresIn: `${expiresIn}s`,
+      refreshIn: `${exp}s`,
+    },
+  });
 };

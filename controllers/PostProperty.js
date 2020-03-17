@@ -10,6 +10,7 @@ module.exports = async (req, res) => {
   const tokenVerifier = sessionValidator(
     req.headers.authorization,
     process.env.RSA_PRIVATE_KEY,
+    'user',
   );
 
   if (tokenVerifier && tokenVerifier.expiration) {

@@ -1,6 +1,6 @@
 const express = require('express');
 const { multerUpload } = require('../middleware/file_upload/multerConfig');
-const { postImages } = require('../controllers/PostImages');
+const postImages = require('../controllers/PostImages');
 
 const router = express.Router();
 
