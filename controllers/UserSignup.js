@@ -61,7 +61,7 @@ module.exports = async (req, response) => {
 
   if ((user && user.error) || !user) {
     return response.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: user.error,
     });
   }
@@ -91,6 +91,7 @@ module.exports = async (req, response) => {
     { algorithm, issuer: iss, audience: aud },
   );
 
+  // log in user
   const loggedUser = await pool.query(
     'INSERT INTO logged_users(user_id, refresh_token) VALUES($1, $2)',
     [uid, refreshToken],
@@ -104,23 +105,36 @@ module.exports = async (req, response) => {
 
   if (loggedUser && loggedUser.error) {
     return response.status(406).send({
-      status: 'Error',
+      remark: 'Error',
       message: loggedUser.error,
     });
   }
 
-  response.status(200).set({
-    Authorization: accessToken,
-    RefreshToken: refreshToken,
-  }).send({
-    message: 'Successfully signed up',
-    data: {
-      uid,
-      name,
-      telephone,
-      emailAddress,
-      expiresIn: `${expiresIn}s`,
-      refreshIn: `${exp}s`,
-    },
-  });
+  // set refresh token in cookie
+  const cookieOptions = {
+    maxAge: 3600000 * 24 * 30,
+    path: '/api/v0.0.1/auth/refresh_token',
+    domain: `.${process.env.DOMAIN_NAME}`,
+    httpOnly: true,
+  };
+
+  if (process.env.DOMAIN_NAME !== 'howmies.com') {
+    delete cookieOptions.domain;
+  }
+
+  response
+    .status(200)
+    .cookie('HURT', refreshToken, cookieOptions)
+    .set('Authorization', accessToken)
+    .send({
+      message: 'Successfully signed up',
+      data: {
+        uid,
+        name,
+        telephone,
+        emailAddress,
+        expiresIn: `${expiresIn}s`,
+        refreshIn: `${exp}s`,
+      },
+    });
 };

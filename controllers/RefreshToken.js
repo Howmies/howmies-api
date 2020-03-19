@@ -12,7 +12,7 @@ module.exports = async (req, response) => {
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   // verify token validation
-  const token = req.headers['x-refresh-token'];
+  const token = req.cookies.HURT;
 
   const tokenVerification = jwt.verify(
     token,
@@ -39,7 +39,7 @@ module.exports = async (req, response) => {
 
   if (tokenVerification && tokenVerification.error) {
     return response.status(403).send({
-      status: 'Error',
+      remark: 'Error',
       message: tokenVerification.error,
     });
   }
@@ -55,12 +55,12 @@ module.exports = async (req, response) => {
       .catch(() => ({ error: 'Internal Server Error. Try again' }));
     if (logout && logout.error) {
       return response.status(403).send({
-        status: 'Error',
+        remark: 'Error',
         message: logout.error,
       });
     }
     return response.status(403).send({
-      status: 'Expired',
+      remark: 'Expired',
       message: 'Refresh token expired. Login to continue',
     });
   }
@@ -81,7 +81,7 @@ module.exports = async (req, response) => {
   // handle scenario for token absent from database
   if (!uid) {
     return response.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Internal Server Error',
     });
   }

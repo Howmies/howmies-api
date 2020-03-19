@@ -1,7 +1,7 @@
-const { header } = require('express-validator');
+const { cookie } = require('express-validator');
 
 module.exports = [
-  header('X-Refresh-Token')
+  cookie('HURT')
     .trim(' ')
     .notEmpty()
     .withMessage('Invalid accessibility')

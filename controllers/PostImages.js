@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 
   if (tokenVerifier && tokenVerifier.expiration) {
     return res.status(401).send({
-      status: 'Expired',
+      remark: 'Expired',
       message: tokenVerifier.expiration,
     });
   }
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
   if ((tokenVerifier && tokenVerifier.error)
     || (tokenVerifier && !tokenVerifier.user)) {
     return res.status(403).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Invalid session access',
     });
   }
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
   // verify images
   if (req.imagesError) {
     return res.status(403).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Ensure your images are jpg, jpeg or png',
     });
   }
@@ -54,14 +54,14 @@ module.exports = async (req, res) => {
 
   if (!imageCount) {
     return res.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Internal server error',
     });
   }
 
   if (imageCount + images.length > 10) {
     return res.status(400).send({
-      status: 'Warning',
+      remark: 'Warning',
       message: 'You have exceeded the images limit. Maximum of 10',
     });
   }
@@ -84,7 +84,7 @@ module.exports = async (req, res) => {
 
   if (!imageURLs) {
     return res.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Error uploading file',
     });
   }
@@ -113,13 +113,13 @@ module.exports = async (req, res) => {
 
   if (savedImages && savedImages.length > 0) {
     res.status(200).send({
-      status: 'Success',
+      remark: 'Success',
       message: 'Image upload succesful',
       data: savedImages,
     });
   } else {
     res.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'No images for this post',
     });
   }
