@@ -12,6 +12,7 @@ const UserLogin = require('./routes/UserLogin');
 const PostProperty = require('./routes/PostProperty');
 const PostImages = require('./routes/PostImages');
 const RefreshToken = require('./routes/RefreshToken');
+const UserSignout = require('./routes/UserSignout');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', `${process.env.ACCESS_CONTROL_ALLOW_ORIGIN || '*'}`);
@@ -27,7 +28,7 @@ app.use(cookieParser());
 
 const checkAPI = (resMessage = 'OK!') => express.Router().get('/', (req, res) => res.send({ message: resMessage }));
 
-app.use('/auth/users', [UserSignup, UserLogin]);
+app.use('/auth/users', [UserSignup, UserLogin, UserSignout]);
 app.use('/auth/properties', [PostProperty, PostImages]);
 app.use('/auth', RefreshToken);
 
