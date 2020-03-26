@@ -10,11 +10,12 @@ module.exports = async (req, res) => {
   const tokenVerifier = sessionValidator(
     req.headers.authorization,
     process.env.RSA_PRIVATE_KEY,
+    'user',
   );
 
   if (tokenVerifier && tokenVerifier.expiration) {
     return res.status(401).send({
-      status: 'Expired',
+      remark: 'Expired',
       message: tokenVerifier.expiration,
     });
   }
@@ -22,7 +23,7 @@ module.exports = async (req, res) => {
   if ((tokenVerifier && tokenVerifier.error)
     || (tokenVerifier && !tokenVerifier.user)) {
     return res.status(403).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Invalid session access',
     });
   }
@@ -72,7 +73,7 @@ module.exports = async (req, res) => {
   // verify property type
   if (!pID) {
     return res.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Internal server error',
     });
   }
@@ -101,7 +102,7 @@ module.exports = async (req, res) => {
 
     if (!availableFeatures) {
       return res.status(500).send({
-        status: 'Error',
+        remark: 'Error',
         message: 'Internal server error',
       });
     }
@@ -136,7 +137,7 @@ module.exports = async (req, res) => {
 
     if (!currentFeatures) {
       return res.status(500).send({
-        status: 'Error',
+        remark: 'Error',
         message: 'Internal server error',
       });
     }
@@ -192,14 +193,14 @@ module.exports = async (req, res) => {
         state: result.rows[0].p_state,
       },
       type: result.rows[0].t_property,
-      status: result.rows[0].s_status,
+      remark: result.rows[0].s_status,
       duration: result.rows[0].r_period,
     }))
     .catch(() => null);
 
   if (!data.data) {
     return res.status(500).send({
-      status: 'Error',
+      remark: 'Error',
       message: 'Internal server error',
     });
   }
@@ -222,7 +223,7 @@ module.exports = async (req, res) => {
 
     if (!data.data.features) {
       return res.status(500).send({
-        status: 'Error',
+        remark: 'Error',
         message: 'Internal server error',
       });
     }

@@ -1,9 +1,14 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = (accessToken, privateSecret) => jwt.verify(
+module.exports = (accessToken, privateSecret, audience) => jwt.verify(
   accessToken,
   privateSecret,
-  { algorithms: ['HS256'], ignoreExpiration: true },
+  {
+    algorithms: ['HS256'],
+    audience,
+    issuer: 'Howmies Entreprise',
+    ignoreExpiration: true,
+  },
   (err, result) => {
     if (err) {
       return { error: 'Invalid session access' };
@@ -16,8 +21,8 @@ module.exports = (accessToken, privateSecret) => jwt.verify(
       return { expiration };
     }
 
-    if (result && result.uid && result.role) {
-      switch (result.role) {
+    if (result && result.uid && result.aud) {
+      switch (result.aud) {
         case 'user':
           return { user: result };
         case 'admin':

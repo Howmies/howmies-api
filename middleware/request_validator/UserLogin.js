@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 
-exports.userLoginValidator = [
+module.exports = [
   body('email')
     .trim(' ')
     .notEmpty()
