@@ -21,4 +21,4 @@ module.exports = {
         "no-restricted-globals": 0,
         "consistent-return": 0
     }
-};
+}; 
