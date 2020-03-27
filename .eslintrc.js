@@ -17,8 +17,8 @@ module.exports = {
         "ecmaVersion": 2018
     },
     "rules": {
-        "linebreak-style": ["error", platform === "linux"? "unix" : "windows"],
+        "linebreak-style": ["error", platform === "linux" ? "unix" : "windows"],
         "no-restricted-globals": 0,
         "consistent-return": 0
     }
-};
+}; 
