@@ -8,11 +8,13 @@ dotenv.config();
 const app = express();
 const server = express();
 
+// require app routes
 const UserSignup = require('./routes/UserSignup');
 const UserLogin = require('./routes/UserLogin');
 const PostProperty = require('./routes/PostProperty');
 const PostImages = require('./routes/PostImages');
 const RefreshToken = require('./routes/RefreshToken');
+const FacebookLogin = require('./routes/FacebookLogin');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', process.env.ACCESS_CONTROL_ALLOW_ORIGIN);
@@ -33,6 +35,7 @@ const checkAPI = (resMessage = 'OK!') => express.Router().get('/', (req, res) =>
 app.use('/auth/users', [UserSignup, UserLogin]);
 app.use('/auth/properties', [PostProperty, PostImages]);
 app.use('/auth', RefreshToken);
+app.use('/auth/facebook', FacebookLogin);
 
 server.use('/api', checkAPI('OK! Howmies'));
 server.use('/api/v0.0.1', [checkAPI('Welcome! Howmies'), app]);
