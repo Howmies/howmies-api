@@ -1,7 +1,7 @@
 const request = require('request');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const pool = require('../elephantsql');
+const pool = require('../middleware/configs/elephantsql');
 const { server, port, listen } = require('../server');
 
 describe('Server', () => {

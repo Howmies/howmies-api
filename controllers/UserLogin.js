@@ -1,15 +1,10 @@
 const dotenv = require('dotenv');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
-const pool = require('../elephantsql');
+const pool = require('../middleware/configs/elephantsql');
+const LoginProcessor = require('../middleware/LoginHandler');
 
 dotenv.config();
-
-const tokenKeys = {
-  keyPrivate: process.env.RSA_PRIVATE_KEY,
-  keyPublic: process.env.RSA_PUBLIC_KEY,
-};
 
 module.exports = async (req, response) => {
   const errors = validationResult(req);
@@ -25,7 +20,7 @@ module.exports = async (req, response) => {
         && bcrypt.compareSync(password, result.rows.find((e) => e.email === email).password)) {
         return {
           data: {
-            uid: result.rows[0].user_id,
+            uid: result.rows[0].id,
             name: `${result.rows[0].first_name} ${result.rows[0].last_name}`,
             telephone: result.rows[0].phone,
             emailAddress: result.rows[0].email,
@@ -53,71 +48,12 @@ module.exports = async (req, response) => {
     uid, name, telephone, emailAddress,
   } = user.data;
 
-  // sign token
-  const expiresIn = 1500;
-  const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
-  const aud = 'user';
-  const iss = 'Howmies Entreprise';
-  const data = 'refresh user';
-  const algorithm = 'HS256';
+  const loginProcessor = new LoginProcessor();
 
-  const accessToken = jwt.sign(
-    {
-      iss, aud, uid,
-    },
-    tokenKeys.keyPrivate,
-    { expiresIn, algorithm },
-  );
-  const refreshToken = jwt.sign(
-    { exp, data },
-    tokenKeys.keyPrivate,
-    { algorithm, issuer: iss, audience: aud },
-  );
-
-  // log in user
-  const loggedUser = await pool.query(
-    'INSERT INTO logged_users(user_id, refresh_token) VALUES($1, $2)',
-    [uid, refreshToken],
-  )
-    .then(() => null)
-    .catch((err) => {
-      if (!err) {
-        return { error: 'Internal Server Error' };
-      }
-    });
-
-  if (loggedUser && loggedUser.error) {
-    return response.status(406).send({
-      remark: 'Error',
-      message: loggedUser.error,
-    });
-  }
-
-  // set refresh token in cookie
-  const cookieOptions = {
-    maxAge: 3600000 * 24 * 30,
-    path: '/api/v0.0.1/auth/refresh_token',
-    domain: `.${process.env.DOMAIN_NAME}`,
-    httpOnly: true,
-  };
-
-  if (process.env.DOMAIN_NAME !== 'howmies.com') {
-    delete cookieOptions.domain;
-  }
-
-  response
-    .status(200)
-    .cookie('HURT', refreshToken, cookieOptions)
-    .set('Authorization', accessToken)
-    .send({
-      message: 'Successfully signed in',
-      data: {
-        uid,
-        name,
-        telephone,
-        emailAddress,
-        expiresIn: `${expiresIn}s`,
-        refreshIn: `${exp}s`,
-      },
-    });
+  loginProcessor.uid = uid;
+  loginProcessor.confirmedLogin = await loginProcessor.loggedUser;
+  loginProcessor.username = name;
+  loginProcessor.telephone = telephone;
+  loginProcessor.email = emailAddress;
+  loginProcessor.successResponse(response);
 };
