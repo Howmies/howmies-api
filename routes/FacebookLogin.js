@@ -23,20 +23,7 @@ userRouter.get('/fail', (req, res) => {
 userRouter.get('/success', (req, res) => {
   const user = userData.loggedUser || userData.newUser;
 
-  res
-    .status(200)
-    .cookie('HURT', user.refreshToken, user.cookieOptions)
-    .set('Authorization', user.accessToken)
-    .send({
-      message: 'Successfully signed up',
-      data: {
-        uid: user.uid,
-        name: user.name,
-        email: user.email,
-        expiresIn: user.expiresIn,
-        refreshIn: user.refreshIn,
-      },
-    });
+  user.loginProcessor.successResponse(res);
 });
 
 module.exports = userRouter;
