@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const pool = require('../elephantsql');
+const pool = require('../middleware/configs/elephantsql');
 
 dotenv.config();
 
