@@ -15,6 +15,7 @@ const UserLogin = require('./routes/UserLogin');
 const PostProperty = require('./routes/PostProperty');
 const PostImages = require('./routes/PostImages');
 const RefreshToken = require('./routes/RefreshToken');
+const UserSignout = require('./routes/UserSignout');
 const FacebookLogin = require('./routes/FacebookLogin');
 
 app.use((req, res, next) => {
@@ -34,7 +35,7 @@ app.use(passport.initialize());
 
 const checkAPI = (resMessage = 'OK!') => express.Router().get('/', (req, res) => res.send({ message: resMessage }));
 
-app.use('/auth/users', [UserSignup, UserLogin]);
+app.use('/auth/users', [UserSignup, UserLogin, UserSignout]);
 app.use('/auth/properties', [PostProperty, PostImages]);
 app.use('/auth', RefreshToken);
 app.use('/auth/facebook', FacebookLogin);
