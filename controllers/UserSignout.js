@@ -9,6 +9,7 @@ module.exports = (req, res) => {
     .then(() => res
       .status(200)
       .clearCookie('HURT', { path: '/api/v0.0.1/auth/refresh_token' })
+      .removeHeader('Authorization')
       .send('Logged Out, Successfully'))
     .catch(() => res.status(500).send({ error: 'Internal Server Error. Try again' }));
 };
