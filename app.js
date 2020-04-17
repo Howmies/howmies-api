@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const passport = require('passport');
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
