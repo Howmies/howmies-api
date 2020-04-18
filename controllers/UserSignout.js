@@ -1,4 +1,4 @@
-const pool = require('../elephantsql');
+const pool = require('../middleware/configs/elephantsql');
 
 module.exports = (req, res) => {
   const token = req.cookies.HURT;
