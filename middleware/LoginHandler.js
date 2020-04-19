@@ -104,7 +104,7 @@ module.exports = class {
       .cookie('HURT', refreshToken, cookieOptions)
       .set('Authorization', accessToken)
       .send({
-        message: 'Successfully signed up',
+        message: 'Successfully logged in',
         data: {
           uid,
           username,
