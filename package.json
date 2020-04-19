@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "test": "jasmine",
-    "host": "git heroku push develop:master",
+    "host": "git push heroku develop:master",
     "tails": "heroku logs --tail"
   },
   "repository": {
