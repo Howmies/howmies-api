@@ -17,6 +17,7 @@ const PostImages = require('./routes/PostImages');
 const RefreshToken = require('./routes/RefreshToken');
 const UserSignout = require('./routes/UserSignout');
 const FacebookLogin = require('./routes/FacebookLogin');
+const GoogleLogin = require('./routes/GoogleLogin');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', process.env.ACCESS_CONTROL_ALLOW_ORIGIN);
@@ -39,6 +40,7 @@ app.use('/auth/users', [UserSignup, UserLogin, UserSignout]);
 app.use('/auth/properties', [PostProperty, PostImages]);
 app.use('/auth', RefreshToken);
 app.use('/auth/facebook', FacebookLogin);
+app.use('/auth/google', GoogleLogin);
 
 server.use('/api', checkAPI('OK! Howmies'));
 server.use('/api/v0.0.1', [checkAPI('Welcome! Howmies'), app]);

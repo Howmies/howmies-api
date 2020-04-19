@@ -1,23 +1,23 @@
 const passport = require('passport');
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
-const strategy = require('passport-facebook');
+const strategy = require('passport-google-oauth20');
 const pool = require('../middleware/configs/elephantsql');
-const facebookLogin = require('../middleware/configs/facebookConfig');
+const googleLogin = require('../middleware/configs/googleConfig');
 const LoginProcessor = require('../middleware/LoginHandler');
 
-const FacebookStrategy = strategy.Strategy;
+const GoogleStrategy = strategy.Strategy;
 
 dotenv.config();
 
-// Sign Facebook user up
+// Sign Google user up
 const salt = bcrypt.genSaltSync(10);
 
-const cryptedFacebookID = (facebookID) => bcrypt.hashSync(facebookID, salt);
+const cryptedGoogleID = (googleID) => bcrypt.hash(googleID, salt);
 
 const loginProcessor = new LoginProcessor();
 
-const registerFacebookUser = async (firstName, lastName, email, facebookID, done) => {
+const registerGoogleUser = async (firstName, lastName, email, googleID, done) => {
   await pool.query(
     `INSERT INTO users(first_name, last_name, email, phone, password, register_date)
     VALUES($1, $2, $3, $4, $5, $6)
@@ -26,7 +26,7 @@ const registerFacebookUser = async (firstName, lastName, email, facebookID, done
       firstName,
       lastName,
       email,
-      cryptedFacebookID(facebookID),
+      cryptedGoogleID(googleID),
       Date.now(),
     ],
     async (err, result) => {
@@ -51,8 +51,8 @@ const registerFacebookUser = async (firstName, lastName, email, facebookID, done
   return null;
 };
 
-// Check if Facebook user is an in-app registered user
-const checkRegisteredUser = async (email, done, firstName, lastName, facebookID) => {
+// Check if Google user is an in-app registered user
+const checkRegisteredUser = async (email, done, firstName, lastName, googleID) => {
   await pool.query(
     'SELECT * FROM users WHERE email=$1',
     [email],
@@ -62,7 +62,7 @@ const checkRegisteredUser = async (email, done, firstName, lastName, facebookID)
       }
 
       if (result.rows && result.rows.length === 0) {
-        return registerFacebookUser(firstName, lastName, email, facebookID, done);
+        return registerGoogleUser(firstName, lastName, email, googleID, done);
       }
 
       if (result.rows && result.rows.length === 1) {
@@ -85,14 +85,14 @@ const checkRegisteredUser = async (email, done, firstName, lastName, facebookID)
 };
 
 passport.use(
-  new FacebookStrategy(
-    facebookLogin,
+  new GoogleStrategy(
+    googleLogin,
     ((accessTokenHowmies, refreshTokenHowmies, profile, done) => {
       const {
-        email, id, first_name, last_name,
+        email, sub, given_name, family_name,
       } = profile._json;
 
-      return checkRegisteredUser(email, done, first_name, last_name, id);
+      return checkRegisteredUser(email, done, given_name, family_name, sub);
     }),
   ),
 );
