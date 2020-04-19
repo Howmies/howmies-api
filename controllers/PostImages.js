@@ -6,8 +6,6 @@ const sessionValidator = require('../middleware/SessionValidator');
 
 dotenv.config();
 
-if (dotenv.config().error) throw dotenv.config().error;
-
 cloudinaryConfig();
 
 module.exports = async (req, res) => {
