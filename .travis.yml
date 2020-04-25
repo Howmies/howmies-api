@@ -2,15 +2,16 @@ language: node_js
 node_js:
   - node
 cache: npm
-
 install:
   - npm ci
-
 script:
   - npm test
-
 deploy:
-  skip-cleanup: true
-  github-token: $GITHUB-TOKEN
+  cleanup: true
+  provider: heroku
+  api_key:
+    secure: XrlNI0t4pd8TbwsnTprKDunnx+L7BnHbUpMjjQrdsJ+MwqfnQlJzyKZYbpbSSx/WO3twY2McFDHe93DchxzYhU0kC2KJe/N7zHera4pyteaMqpQQQmPekqFFZmzceXK3nLAGNVOGPCzA9JWH/31580D0NKo9Q4oG2UVMq00zZP82CgJ3zIM3V1eUaSXA0yjSMdWbpUG3/2fJHqjeyB0HAoXN/3EaAp72b1tVmoF0M5nJiQ0MAESln7ek8UiiNGXHNZiRBMskUanMbSF69WCiSsp3Yae9pnXAyDFRtB1KlnMMO3+IMmZ1PQxARV945z84I6FWtdr+HLXAnyj2j1rKyZleKXv7jmQHjT1/Mj/0JWMHYg/Mi0880mqY125uC1c+81XwOtPq1ub/IvoEYPDke65TV7GtPP/DGkvPmIVAkhz0NB6yHl5X4mdBvXs+TjD2GkjG81sPnKH4Jcy80y5XJAwRyyKrcnE9AjPKSccbKhC2Oo+Yltk9M2SFNMObV1kJUW65G5Ge7LgoyvWBsKIoUocQ2VTdLIqxdKqFBGQ6U3fcBP20VKTVPPVkbBVBd7k8nRxZ25PEeTSvC0hQw6WsqdIjg87VnESxlkx/CTC+sjgC+RKClQeU8tZx9XEIFy445ccU/otsCCi0N3jYbCpKy7teWNymBJ2OJDij0ux86kU=
+  app: howmies-api-develop
   on:
+    repo: Matthewnte/howmies-api
     branch: develop
