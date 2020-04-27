@@ -7,11 +7,11 @@ install:
 script:
   - npm test
 deploy:
-  cleanup: true
-  provider: heroku
-  api_key:
-    secure: XrlNI0t4pd8TbwsnTprKDunnx+L7BnHbUpMjjQrdsJ+MwqfnQlJzyKZYbpbSSx/WO3twY2McFDHe93DchxzYhU0kC2KJe/N7zHera4pyteaMqpQQQmPekqFFZmzceXK3nLAGNVOGPCzA9JWH/31580D0NKo9Q4oG2UVMq00zZP82CgJ3zIM3V1eUaSXA0yjSMdWbpUG3/2fJHqjeyB0HAoXN/3EaAp72b1tVmoF0M5nJiQ0MAESln7ek8UiiNGXHNZiRBMskUanMbSF69WCiSsp3Yae9pnXAyDFRtB1KlnMMO3+IMmZ1PQxARV945z84I6FWtdr+HLXAnyj2j1rKyZleKXv7jmQHjT1/Mj/0JWMHYg/Mi0880mqY125uC1c+81XwOtPq1ub/IvoEYPDke65TV7GtPP/DGkvPmIVAkhz0NB6yHl5X4mdBvXs+TjD2GkjG81sPnKH4Jcy80y5XJAwRyyKrcnE9AjPKSccbKhC2Oo+Yltk9M2SFNMObV1kJUW65G5Ge7LgoyvWBsKIoUocQ2VTdLIqxdKqFBGQ6U3fcBP20VKTVPPVkbBVBd7k8nRxZ25PEeTSvC0hQw6WsqdIjg87VnESxlkx/CTC+sjgC+RKClQeU8tZx9XEIFy445ccU/otsCCi0N3jYbCpKy7teWNymBJ2OJDij0ux86kU=
-  app: howmies-api-develop
-  on:
-    repo: Matthewnte/howmies-api
-    branch: develop
+  - cleanup: false
+    provider: heroku
+    api_key:
+      secure: VmYFwWOpZULicwTTHGQYrVObH9uCjhDQVot2dUdueGSsgEqVq3/soTAYlIauWl1BJ1IqcA2PHVknLzb9h8jBwwYYbFD/KNG0GGvDTrhkGVB4Lbj9PXiNZWofxulSSy7mNWZ0m0EmaGhXiYJbOAyX1a4aDODYNhSVuUvfOlaiabYabGk2HPGqYmtE7ecEAlFA8DMI4Jz2ZgwhUsBNvcJwmN/FsL02npQmv7uSUFmcqgkJ9tuK1Mr0td7/BXIKmkEZiEZLpmpq3Yh0WgMlm9vs8iQkaTuhlYhW147x3m5bJf7XufGFl7TH95LguEXIGe3g97nvNQskWikNGLrf16o9oLxIhcgt0XeEoyAovtOMQYayW/4Sh5oP5f+LuHrFx/e+sMAAHLUOIv2v0syFM0STn4ZzmfzrHNbhM8CYmwAo9gIrS/fwAtbdgbzqqngDgQEIe2rpCi+L7qvoS7Xqg6/B4OwoUHNkl3EZbKVwax76ZuuVNGXxllvafSuFIScFQvzsB0OOmtmc1DYgc0mbW9JUT5BIgkUwQBeABrksGNm9JCFQOHcMLThTwUJnAEoId/9OqRf+Eyl4Qo3ls04PYkHPv7U+RgYUq7kMgL6GGtkjMKr9pnkTrOKnKc93mzAXqW6+9L7vUegViRWuE5tur6V5+QWuwIXk8MOhV9aJQIXfAcM=
+    app: howmies-api-develop
+    on:
+      repo: Howmies/howmies-api
+      branch: develop
