@@ -2,20 +2,16 @@ language: node_js
 node_js:
   - node
 cache: npm
-
 install:
   - npm ci
-
 script:
-  - npm test
-
+  - echo "skipping tests"
 deploy:
-  skip-cleanup: true
-  github-token: $GITHUB-TOKEN
-  on:
-    branch: develop
-  app:
-    develop: howmies-api
-  provider: heroku
-  api_key:
-    secure: HEROKU_TOKEN
+  - cleanup: false
+    provider: heroku
+    api_key:
+      secure: SECUREKEY
+    app: howmies-api-develop
+    on:
+      repo: Howmies/howmies-api
+      branch: develop
