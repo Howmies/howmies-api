@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Matthewnte/Howmies-api.git"
+    "url": "git+https://github.com/Howmies/howmies-api.git"
   },
   "author": "Akanji Tobi (Tboy-AK)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Matthewnte/Howmies-api/issues"
+    "url": "https://github.com/Howmies/howmies-api/issues"
   },
-  "homepage": "https://github.com/Matthewnte/Howmies-api#readme",
+  "homepage": "https://github.com/Howmies/howmies-api#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.19.0",
