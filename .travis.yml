@@ -7,14 +7,11 @@ install:
 script:
   - echo "skipping tests"
 deploy:
-  matrix:
-    - cleanup: false
-      provider: heroku
-      api_key:
-        secure: HEROKU_SECUREKEY
-      app: howmies-api-develop
-      on:
-        repo: Howmies/howmies-api
-        branch: develop
-  api_key:
-    secure: "gNRdBXLkLORWm/xhP/rcwe1KCGhAP18+2ZI7N3Kk9KiEzheIk1aRPgoqAW8TX7VsIL2XtPSv5llHgl5kRcgJfuKf2rLTX+gL/m2opk/VdQRisNUxNcHqrGq2dUel2FYzhJ1GdrQThBEJ2Kt08mpEOG91x/Ef1GzGE4fozXF2toAby5/IYAFcKrnOOTckbMQuJHkCYauORrd8mHxXST8ZiQaCH6VqtidoBenC8Hngur6IjtDrCAL1emP5RwSbsU9jVc17U1AlSjhGYLoOGLaZ5soDZzmJHQ8jkPxMYMu1yCN2VqPF31N3U4eW+ftglBxHvSFN9nuKPT59GDNx0WjV010WxV6TuUy5HgVh3hCLhEoI8XN3SP3e91N2XIMqv+C6K8nCGtQa6DZoZ6qx9ZVGfonAA29eaVn/V1PbrF8ww3AZDfh7TO7iKi4I7CByEYz3dEeJ8MDM7LDMj9+1yfIphvjS6tBnljSFw54QXwYXnpGStOGl/p4xIRX41W6H/t0+isv2CFtZy5MSEinYrbs/NwuORCG6DOrv2EwUCfIjrtMHILuOtGXZ72FiUuWzDs3EmKxF/6AxLyeFKHOewZnqTQauhYOK4sVKttz9OhTA7mSkI+QTD3ZzjXqffVjMt+vsGlyLLrjT2+L4FmGv4NE30xybxdpXexL3l0NS9Bs2tNE="
+  - cleanup: false
+    provider: heroku
+    api_key:
+      secure: "gNRdBXLkLORWm/xhP/rcwe1KCGhAP18+2ZI7N3Kk9KiEzheIk1aRPgoqAW8TX7VsIL2XtPSv5llHgl5kRcgJfuKf2rLTX+gL/m2opk/VdQRisNUxNcHqrGq2dUel2FYzhJ1GdrQThBEJ2Kt08mpEOG91x/Ef1GzGE4fozXF2toAby5/IYAFcKrnOOTckbMQuJHkCYauORrd8mHxXST8ZiQaCH6VqtidoBenC8Hngur6IjtDrCAL1emP5RwSbsU9jVc17U1AlSjhGYLoOGLaZ5soDZzmJHQ8jkPxMYMu1yCN2VqPF31N3U4eW+ftglBxHvSFN9nuKPT59GDNx0WjV010WxV6TuUy5HgVh3hCLhEoI8XN3SP3e91N2XIMqv+C6K8nCGtQa6DZoZ6qx9ZVGfonAA29eaVn/V1PbrF8ww3AZDfh7TO7iKi4I7CByEYz3dEeJ8MDM7LDMj9+1yfIphvjS6tBnljSFw54QXwYXnpGStOGl/p4xIRX41W6H/t0+isv2CFtZy5MSEinYrbs/NwuORCG6DOrv2EwUCfIjrtMHILuOtGXZ72FiUuWzDs3EmKxF/6AxLyeFKHOewZnqTQauhYOK4sVKttz9OhTA7mSkI+QTD3ZzjXqffVjMt+vsGlyLLrjT2+L4FmGv4NE30xybxdpXexL3l0NS9Bs2tNE="
+    app: howmies-api-develop
+    on:
+      repo: Howmies/howmies-api
+      branch: develop
