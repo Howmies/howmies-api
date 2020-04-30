@@ -49,15 +49,26 @@ module.exports = async (req, response) => {
       }
     })
     .catch((err) => ({
-      error: (
-        err.message.includes('getaddrinfo', 0)
-      ) ? 'Internal Server Error' : 'Account already in use',
+      error: err.message.includes('duplicate')
+        ? {
+          status: 406,
+          message: 'Account already in use',
+        } : {
+          status: 500,
+          message: 'Internal Server Error',
+        },
     }));
 
-  if ((user && user.error) || !user) {
+  if (user && user.error) {
+    return response.status(user.error.status).send({
+      remark: 'Error',
+      message: user.error.message,
+    });
+  }
+  if (!user) {
     return response.status(500).send({
       remark: 'Error',
-      message: user.error,
+      message: 'Internal Server Error',
     });
   }
 

@@ -18,7 +18,7 @@ describe('Server', () => {
 
   describe('POST /auth/users/signup', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v1/auth/users/signup';
+    const uri = 'http://localhost:3000/api/v0.0.1/auth/users/signup';
     let userSignupRequest;
 
     describe('with all data in correct format', () => {
@@ -54,7 +54,7 @@ describe('Server', () => {
         expect(result.status).toBe(expected);
       });
       it('successfully signs up user with success response message', () => {
-        const expected = 'Successfully signed up';
+        const expected = 'Successfully logged in';
         expect(result.message).toBe(expected);
       });
     });
