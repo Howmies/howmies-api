@@ -15,3 +15,11 @@ deploy:
     on:
       repo: Howmies/howmies-api
       branch: develop
+services:
+  - postgresql
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
