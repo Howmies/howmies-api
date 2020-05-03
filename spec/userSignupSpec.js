@@ -1,24 +1,21 @@
 const request = require('request');
 const pool = require('../middleware/configs/elephantsql');
-const { server, port, listen } = require('../server');
+const { port, server } = require('../server');
 
 describe('Server', () => {
-  let service;
   beforeAll((done) => {
-    listen.close();
-    service = server.listen(port);
+    server.listen(port);
     done();
   });
   afterAll((done) => {
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
-    service.close();
+    server.close();
     done();
   });
 
-
   describe('POST /auth/users/signup', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v1/auth/users/signup';
+    const uri = `http://localhost:${port}/api/v0.0.1/auth/users/signup`;
     let userSignupRequest;
 
     describe('with all data in correct format', () => {
@@ -35,16 +32,17 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
-          if (err) { return console.log(`Error deleting from database - ${err.message}`); }
+          if (err) { return console.error(`Error deleting from database - ${err.message}`); }
           console.log('Test complete for fully correct data format');
           done();
         });
@@ -54,7 +52,7 @@ describe('Server', () => {
         expect(result.status).toBe(expected);
       });
       it('successfully signs up user with success response message', () => {
-        const expected = 'Successfully signed up';
+        const expected = 'Successfully logged in';
         expect(result.message).toBe(expected);
       });
     });
@@ -73,14 +71,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against user\'s name too long');
         done();
       });
@@ -107,14 +106,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against excluded required data');
         done();
       });
@@ -142,14 +142,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against empty required data');
         done();
       });
@@ -177,14 +178,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against wrong email format');
         done();
       });
@@ -212,14 +214,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against wrong password format');
         done();
       });
@@ -247,14 +250,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against wrong phone number format');
         done();
       });
@@ -282,14 +286,15 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against already existing email');
         done();
       });
@@ -317,21 +322,24 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+
+      afterEach((done) => {
         console.log('Test complete against already existing phone number');
         done();
       });
+
       it('fails to sign up user with response Status 406', () => {
         const expected = 406;
         expect(result.status).toBe(expected);
       });
+
       it('fails to sign up user with response message', () => {
         const expected = 'Account already in use';
         expect(result.message).toBe(expected);

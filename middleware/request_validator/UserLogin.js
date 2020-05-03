@@ -13,6 +13,6 @@ module.exports = [
     .notEmpty()
     .withMessage('Input a user password')
     .isLength({ max: 24, min: 8 })
-    .withMessage('Password is incorrect')
+    .withMessage('Password must not be less than 8 characters long')
     .escape(),
 ];

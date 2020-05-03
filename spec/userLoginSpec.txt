@@ -1,3 +1,4 @@
+/*
 const request = require('request');
 const { server, port, listen } = require('../server');
 
@@ -16,7 +17,7 @@ describe('Server', () => {
 
   describe('POST /auth/users/login', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v1/auth/users/login';
+    const uri = 'http://localhost:3000/api/v0.0.1/auth/users/login';
     let userLoginRequest;
 
     describe('with all data in correct format', () => {
@@ -41,12 +42,12 @@ describe('Server', () => {
         console.log('Test complete for fully correct data format');
         done();
       });
-      it('successfully signs up user with response Status 200', () => {
+      it('successfully signs in user with response Status 200', () => {
         const expected = 200;
         expect(result.status).toBe(expected);
       });
-      it('successfully signs up user with success response message', () => {
-        const expected = 'Successfully signed up';
+      it('successfully signs in user with success response message', () => {
+        const expected = 'Successfully logged in';
         expect(result.message).toBe(expected);
       });
     });
@@ -72,11 +73,11 @@ describe('Server', () => {
         console.log('Test complete against excluded required data');
         done();
       });
-      it('fails to sign up user with response Status 422', () => {
+      it('fails to sign in user with response Status 422', () => {
         const expected = 422;
         expect(result.status).toBe(expected);
       });
-      it('fails to sign up user with response message', () => {
+      it('fails to sign in user with response message', () => {
         const expected = 'password';
         expect(result.message.find((e) => e.param === 'password').param).toBe(expected);
       });
@@ -104,11 +105,11 @@ describe('Server', () => {
         console.log('Test complete against empty required data');
         done();
       });
-      it('fails to sign up user with response Status 422', () => {
+      it('fails to sign in user with response Status 422', () => {
         const expected = 422;
         expect(result.status).toBe(expected);
       });
-      it('fails to sign up user with response message', () => {
+      it('fails to sign in user with response message', () => {
         const expected = 'password';
         expect(result.message.find((e) => e.param === 'password').param).toBe(expected);
       });
@@ -136,11 +137,11 @@ describe('Server', () => {
         console.log('Test complete against wrong email format');
         done();
       });
-      it('fails to sign up user with response Status 422', () => {
+      it('fails to sign in user with response Status 422', () => {
         const expected = 422;
         expect(result.status).toBe(expected);
       });
-      it('fails to sign up user with response message', () => {
+      it('fails to sign in user with response message', () => {
         const expected = 'email';
         expect(result.message.find((e) => e.param === 'email').param).toBe(expected);
       });
@@ -168,11 +169,11 @@ describe('Server', () => {
         console.log('Test complete against wrong password format');
         done();
       });
-      it('fails to sign up user with response Status 422', () => {
+      it('fails to sign in user with response Status 422', () => {
         const expected = 422;
         expect(result.status).toBe(expected);
       });
-      it('fails to sign up user with response message', () => {
+      it('fails to sign in user with response message', () => {
         const expected = 'password';
         expect(result.message.find((e) => e.param === 'password').param).toBe(expected);
       });
@@ -200,14 +201,15 @@ describe('Server', () => {
         console.log('Test complete against incorrect user information');
         done();
       });
-      it('fails to sign up user with response Status 406', () => {
+      it('fails to sign in user with response Status 406', () => {
         const expected = 406;
         expect(result.status).toBe(expected);
       });
-      it('fails to sign up user with response message', () => {
+      it('fails to sign in user with response message', () => {
         const expected = 'Incorrect email or password';
         expect(result.message).toBe(expected);
       });
     });
   });
 });
+*/

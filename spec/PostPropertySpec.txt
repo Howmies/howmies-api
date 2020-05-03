@@ -1,6 +1,6 @@
+/*
 const request = require('request');
 const jwt = require('jsonwebtoken');
-const path = require('path');
 const pool = require('../middleware/configs/elephantsql');
 const { server, port, listen } = require('../server');
 
@@ -19,25 +19,24 @@ describe('Server', () => {
 
   describe('POST /properties', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v1/properties';
+    const uri = 'http://localhost:3000/api/v0.0.1/properties';
     let postPropertiesRequest;
     let authenticationToken;
     let images;
 
     describe('without feature request', () => {
-      images = [
-        path.resolve(__dirname, './images/inec-logo1.gif'),
-        path.resolve(__dirname, './images/wine-colors-excerpt.jpg'),
-      ];
       postPropertiesRequest = {
-        type: 'house',
+        status: '',
+        phone: '',
+        email: 'testEmail',
+        features: '',
+        type: 'testHouse',
         state: 'testState',
         lga: 'testLGA',
         address: 'testPropertyAddress',
         price: 1000,
         period: 'Monthly',
         description: 'testPropertyDescription',
-        images,
       };
       authenticationToken = {
         authorization: jwt.sign(
@@ -66,7 +65,7 @@ describe('Server', () => {
       });
       afterAll((done) => {
         pool.query('delete from properties where state=$1', ['testPropertyState'], (err) => {
-          if (err) { return console.log(`Error deleting from database - ${err.message}`); }
+          if (err) { return console.error(`Error deleting from database - ${err.message}`); }
           console.log('Test complete for fully correct data format');
           done();
         });
@@ -76,9 +75,10 @@ describe('Server', () => {
         expect(result.status).toBe(expected);
       });
       it('successfully posts property with success response message', () => {
-        const expected = 'Checking for point of error';
+        const expected = 'Property posted successfully';
         expect(result.message).toBe(expected);
       });
     });
   });
 });
+*/
