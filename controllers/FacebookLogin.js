@@ -19,8 +19,8 @@ const loginProcessor = new LoginProcessor();
 
 const registerFacebookUser = async (firstName, lastName, email, facebookID, done) => {
   await pool.query(
-    `INSERT INTO users(first_name, last_name, email, phone, password, register_date)
-    VALUES($1, $2, $3, $4, $5, $6)
+    `INSERT INTO users(first_name, last_name, email, password, register_date)
+    VALUES($1, $2, $3, $4, $5)
     RETURNING *`,
     [
       firstName,

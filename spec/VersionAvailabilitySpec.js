@@ -1,23 +1,19 @@
+const dotenv = require('dotenv');
 const request = require('request');
-const { port, server } = require('../server');
+require('../server');
+
+dotenv.config();
 
 const version = 'v0.0.1';
 
 describe('Server', () => {
-  beforeAll((done) => {
-    server.close();
-    server.listen(port);
-    done();
-  });
-  afterAll((done) => {
+  afterAll(() => {
     console.log('\x1b[42m\x1b[30m', 'Finished API version availability tests\x1b[0m\n');
-    server.close();
-    done();
   });
 
   describe('GET /', () => {
     const result = {};
-    const uri = `http://localhost:${port}/api/${version}/`;
+    const uri = `http://localhost:${process.env.PORT}/api/${version}/`;
 
     describe('development root url', () => {
       const options = {

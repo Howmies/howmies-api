@@ -59,16 +59,17 @@ module.exports = async (req, response) => {
         },
     }));
 
-  if (user && user.error) {
-    return response.status(user.error.status).send({
-      remark: 'Error',
-      message: user.error.message,
-    });
-  }
   if (!user) {
     return response.status(500).send({
       remark: 'Error',
       message: 'Internal Server Error',
+    });
+  }
+
+  if (user && user.error) {
+    return response.status(user.error.status).send({
+      remark: 'Error',
+      message: user.error.message,
     });
   }
 
