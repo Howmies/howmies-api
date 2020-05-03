@@ -15,7 +15,6 @@ describe('Server', () => {
     done();
   });
 
-
   describe('POST /auth/users/signup', () => {
     const result = {};
     const uri = 'http://localhost:3000/api/v0.0.1/auth/users/signup';
@@ -42,6 +41,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
           if (err) { return console.log(`Error deleting from database - ${err.message}`); }
@@ -80,6 +80,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against user\'s name too long');
         done();
@@ -114,6 +115,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against excluded required data');
         done();
@@ -149,6 +151,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against empty required data');
         done();
@@ -184,6 +187,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against wrong email format');
         done();
@@ -219,6 +223,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against wrong password format');
         done();
@@ -254,6 +259,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against wrong phone number format');
         done();
@@ -289,6 +295,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against already existing email');
         done();
@@ -324,6 +331,7 @@ describe('Server', () => {
           done();
         });
       });
+
       afterAll((done) => {
         console.log('Test complete against already existing phone number');
         done();
