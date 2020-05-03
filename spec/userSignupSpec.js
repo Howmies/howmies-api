@@ -3,14 +3,17 @@ const pool = require('../middleware/configs/elephantsql');
 const { port, server } = require('../server');
 
 describe('Server', () => {
-  beforeAll((done) => {
+  beforeEach((done) => {
+    server.close();
     server.listen(port);
     done();
   });
-  afterAll((done) => {
-    console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
+  afterEach((done) => {
     server.close();
     done();
+  });
+  afterAll(() => {
+    console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
   });
 
   describe('POST /auth/users/signup', () => {
