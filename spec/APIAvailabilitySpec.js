@@ -1,21 +1,17 @@
+const dotenv = require('dotenv');
 const request = require('request');
-const { port, server } = require('../server');
+require('../server');
+
+dotenv.config();
 
 describe('Server', () => {
-  beforeAll((done) => {
-    server.close();
-    server.listen(port);
-    done();
-  });
-  afterAll((done) => {
+  afterAll(() => {
     console.log('\x1b[42m\x1b[30m', 'Finished API avalability tests\x1b[0m\n');
-    server.close();
-    done();
   });
 
   describe('GET /', () => {
     const result = {};
-    const uri = `http://localhost:${port}/api`;
+    const uri = `http://localhost:${process.env.PORT}/api`;
 
     describe('development root url', () => {
       const options = {

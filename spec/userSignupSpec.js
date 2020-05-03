@@ -1,24 +1,18 @@
+const dotenv = require('dotenv');
 const request = require('request');
 const pool = require('../middleware/configs/elephantsql');
-const { port, server } = require('../server');
+require('../server');
+
+dotenv.config();
 
 describe('Server', () => {
-  beforeEach((done) => {
-    server.close();
-    server.listen(port);
-    done();
-  });
-  afterEach((done) => {
-    server.close();
-    done();
-  });
   afterAll(() => {
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
   });
 
   describe('POST /auth/users/signup', () => {
     const result = {};
-    const uri = `http://localhost:${port}/api/v0.0.1/auth/users/signup`;
+    const uri = `http://localhost:${process.env.PORT}/api/v0.0.1/auth/users/signup`;
     let userSignupRequest;
 
     describe('with all data in correct format', () => {
