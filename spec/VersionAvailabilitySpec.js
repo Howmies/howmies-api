@@ -25,14 +25,14 @@ describe('Server', () => {
         json: true,
       };
 
-      beforeAll((done) => {
+      beforeEach((done) => {
         request(uri, options, (error, response, body) => {
           result.status = response.statusCode;
           result.message = body.message;
           done();
         });
       });
-      afterAll((done) => {
+      afterEach((done) => {
         console.log('Test complete for API version availability');
         done();
       });
