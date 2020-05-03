@@ -4,7 +4,6 @@ const { port, server } = require('../server');
 
 describe('Server', () => {
   beforeAll((done) => {
-    server.close();
     server.listen(port);
     done();
   });

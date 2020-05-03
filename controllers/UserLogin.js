@@ -30,14 +30,14 @@ module.exports = async (req, response) => {
     })
     .catch(() => ({ error: 'Internal Server Error. Try again' }));
 
-  if (user.error) {
+  if (user && user.error) {
     return response.status(500).send({
       remark: 'Error',
       message: user.error,
     });
   }
 
-  if (!user.data) {
+  if (!user || user.data) {
     return response.status(406).send({
       remark: 'Error',
       message: 'Incorrect email or password',
