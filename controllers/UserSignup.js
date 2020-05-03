@@ -59,10 +59,16 @@ module.exports = async (req, response) => {
         },
     }));
 
-  if (!user || (user && user.error)) {
+  if (user && user.error) {
     return response.status(user.error.status).send({
       remark: 'Error',
       message: user.error.message,
+    });
+  }
+  if (!user) {
+    return response.status(406).send({
+      remark: 'Error',
+      message: 'Account already in use',
     });
   }
 

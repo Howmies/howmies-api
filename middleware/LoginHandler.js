@@ -99,7 +99,7 @@ module.exports = class {
       username, telephone, email, expiresIn, exp,
     } = this;
 
-    res
+    return res
       .status(200)
       .cookie('HURT', refreshToken, cookieOptions)
       .set('Authorization', accessToken)
