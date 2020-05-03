@@ -65,6 +65,7 @@ module.exports = async (req, response) => {
       message: 'Internal Server Error',
     });
   }
+
   if (user && user.error) {
     return response.status(user.error.status).send({
       remark: 'Error',
