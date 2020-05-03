@@ -17,7 +17,7 @@ describe('Server', () => {
 
   describe('POST /auth/users/signup', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api/v0.0.1/auth/users/signup';
+    const uri = `http://localhost:${port}/api/v0.0.1/auth/users/signup`;
     let userSignupRequest;
 
     describe('with all data in correct format', () => {
@@ -44,7 +44,7 @@ describe('Server', () => {
 
       afterAll((done) => {
         pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
-          if (err) { return console.log(`Error deleting from database - ${err.message}`); }
+          if (err) { return console.error(`Error deleting from database - ${err.message}`); }
           console.log('Test complete for fully correct data format');
           done();
         });
