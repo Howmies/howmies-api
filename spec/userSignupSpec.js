@@ -1,17 +1,16 @@
 const request = require('request');
 const pool = require('../middleware/configs/elephantsql');
-const { server, port, listen } = require('../server');
+const { port, server } = require('../server');
 
 describe('Server', () => {
-  let service;
   beforeAll((done) => {
-    listen.close();
-    service = server.listen(port);
+    server.close();
+    server.listen(port);
     done();
   });
   afterAll((done) => {
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
-    service.close();
+    server.close();
     done();
   });
 
@@ -336,10 +335,12 @@ describe('Server', () => {
         console.log('Test complete against already existing phone number');
         done();
       });
+
       it('fails to sign up user with response Status 406', () => {
         const expected = 406;
         expect(result.status).toBe(expected);
       });
+
       it('fails to sign up user with response message', () => {
         const expected = 'Account already in use';
         expect(result.message).toBe(expected);

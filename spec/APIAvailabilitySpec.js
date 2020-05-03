@@ -1,22 +1,21 @@
 const request = require('request');
-const { server, port, listen } = require('../server');
+const { port, server } = require('../server');
 
 describe('Server', () => {
-  let service;
   beforeAll((done) => {
-    listen.close();
-    service = server.listen(port);
+    server.close();
+    server.listen(port);
     done();
   });
   afterAll((done) => {
     console.log('\x1b[42m\x1b[30m', 'Finished API avalability tests\x1b[0m\n');
-    service.close();
+    server.close();
     done();
   });
 
   describe('GET /', () => {
     const result = {};
-    const uri = 'http://localhost:3000/api';
+    const uri = `http://localhost:${port}/api`;
 
     describe('development root url', () => {
       const options = {

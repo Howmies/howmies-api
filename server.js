@@ -47,6 +47,7 @@ server.on('listening', () => {
   console.log(`Listening on ${bind}`);
 });
 
-exports.listen = server.listen(port);
 exports.server = server;
 exports.port = port;
+
+server.listen(port);
