@@ -5,16 +5,10 @@ require('../server');
 
 dotenv.config();
 
-const testTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-
 describe('POST /auth/users/signup', () => {
-  beforeAll(() => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
-  });
-
-  afterAll(() => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = testTimeout;
+  afterAll((done) => {
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
+    done();
   });
 
   const uri = `http://localhost:${process.env.PORT}/api/v0.0.1/auth/users/signup`;
@@ -89,8 +83,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against user\'s name too long');
+      done();
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -130,8 +125,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against excluded required data');
+      done();
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -172,8 +168,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against empty required data');
+      done();
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -213,8 +210,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against wrong email format');
+      done();
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -254,8 +252,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against wrong password format');
+      done();
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -295,8 +294,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against wrong phone number format');
+      done();
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -337,8 +337,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against already existing email');
+      done();
     });
 
     it('fails to sign up user with response Status 406', (done) => {
@@ -347,7 +348,7 @@ describe('POST /auth/users/signup', () => {
       done();
     });
 
-    it('fails to sign up user with response message', (done) => {
+    fit('fails to sign up user with response message', (done) => {
       const expected = 'Account already in use';
       expect(result.message).toBe(expected);
       done();
@@ -378,8 +379,9 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
       console.log('Test complete against already existing phone number');
+      done();
     });
 
     it('fails to sign up user with response Status 406', (done) => {
