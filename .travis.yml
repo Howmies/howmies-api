@@ -5,7 +5,7 @@ cache: npm
 install:
   - npm ci
 script:
-  - echo "skipping tests"
+  - npm test
 deploy:
   - cleanup: false
     provider: heroku
