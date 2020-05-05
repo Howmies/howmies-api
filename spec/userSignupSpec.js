@@ -35,8 +35,8 @@ describe('POST /auth/users/signup', () => {
       json: true,
     };
 
-    beforeEach((done) => {
-      request(uri, options, (error, response, body) => {
+    beforeEach(async (done) => {
+      await request(uri, options, (error, response, body) => {
         result.status = response.statusCode;
         result.message = body.message;
         done();
@@ -51,15 +51,15 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-    it('successfully signs up user with response Status 200', (done) => {
+    it('successfully signs up user with response Status 200', async (done) => {
       const expected = 200;
-      expect(result.status).toBe(expected);
+      expect(await result.status).toBe(expected);
       done();
     });
 
-    it('successfully signs up user with success response message', (done) => {
+    it('successfully signs up user with success response message', async (done) => {
       const expected = 'Successfully logged in';
-      expect(result.message).toBe(expected);
+      expect(await result.message).toBe(expected);
       done();
     });
   });
