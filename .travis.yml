@@ -4,6 +4,8 @@ node_js:
 cache: npm
 install:
   - npm ci
+services:
+  - postgresql
 script:
   - npm test
 deploy:
