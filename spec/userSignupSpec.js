@@ -5,8 +5,14 @@ require('../server');
 
 dotenv.config();
 
+const testTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+
 describe('POST /auth/users/signup', () => {
+  beforeAll(() => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+  });
   afterAll((done) => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = testTimeout;
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
     done();
   });
