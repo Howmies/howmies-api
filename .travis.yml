@@ -10,11 +10,11 @@ before_script:
   - psql -c 'create database howmies;' -U postgres
   - psql "dbname=howmies" -a -f init.sql
 addons:
-  postgresql: "10"
+  postgresql: "12"
   apt:
     packages:
-      - postgresql-10
-      - postgresql-client-10
+      - postgresql-12
+      - postgresql-client-12
 env:
   global:
     - DB_USER=postgres
