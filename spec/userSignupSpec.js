@@ -354,7 +354,7 @@ describe('POST /auth/users/signup', () => {
       done();
     });
 
-    fit('fails to sign up user with response message', (done) => {
+    it('fails to sign up user with response message', (done) => {
       const expected = 'Account already in use';
       expect(result.message).toBe(expected);
       done();

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    id integer NOT NULL DEFAULT nextval('"Clients_client_id_seq"'::regclass),
+    id integer NOT NULL DEFAULT nextval('"users_id_seq"'::regclass),
     first_name character varying(24) COLLATE pg_catalog."default" NOT NULL,
     email character varying(60) COLLATE pg_catalog."default" NOT NULL,
     phone character varying(16) COLLATE pg_catalog."default",
