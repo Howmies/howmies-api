@@ -19,7 +19,7 @@ describe('POST /auth/users/signup', () => {
 
   const uri = `http://localhost:${process.env.PORT}/api/v0.0.1/auth/users/signup`;
 
-  describe('with all data in correct format', () => {
+  fdescribe('with all data in correct format', () => {
     const result = {};
     const userSignupRequest = {
       firstName: 'testFirstName',
@@ -318,7 +318,7 @@ describe('POST /auth/users/signup', () => {
     });
   });
 
-  fdescribe('with already existing email', () => {
+  describe('with already existing email', () => {
     const result = {};
 
     const userSignupRequest = {
