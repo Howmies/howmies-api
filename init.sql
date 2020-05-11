@@ -1,3 +1,4 @@
+CREATE SEQUENCE users_id_seq;
 CREATE TABLE IF NOT EXISTS users
 (
     id integer NOT NULL DEFAULT nextval('"users_id_seq"'::regclass),
