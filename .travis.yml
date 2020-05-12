@@ -1,11 +1,29 @@
 language: node_js
 node_js:
-  - node
+  - 12
 cache: npm
 install:
   - npm ci
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database howmies;' -U postgres
+  - psql "dbname=howmies" -a -f init.sql
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+env:
+  global:
+    - DB_USER=postgres
+    - DB_HOST=localhost
+    - DB_DATABASE=howmies
+    - DB_PORT=5432
+    - DB_PASSWORD=
 script:
-  - echo "skipping tests"
+  - npm test
 deploy:
   - cleanup: false
     provider: heroku
