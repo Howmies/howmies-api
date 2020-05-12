@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const dotenv = require('dotenv');
 const request = require('request');
 const pool = require('../middleware/configs/elephantsql');
@@ -40,8 +42,7 @@ describe('Server', () => {
       afterEach((done) => {
         pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
           if (err) { return console.error(`Error deleting from database - ${err.message}`); }
-          console.log('Test complete for fully correct data format');
-          done();
+          done(console.log('Test complete for fully correct data format'));
         });
       });
       it('successfully signs up user with response Status 200', () => {
@@ -77,8 +78,7 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against user\'s name too long');
-        done();
+        done(console.log('Test complete against user\'s name too long'));
       });
       it('fails to sign up user with response Status 422', () => {
         const expected = 422;
@@ -112,8 +112,7 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against excluded required data');
-        done();
+        done(console.log('Test complete against excluded required data'));
       });
       it('fails to sign up user with response Status 422', () => {
         const expected = 422;
@@ -148,8 +147,7 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against empty required data');
-        done();
+        done(console.log('Test complete against empty required data'));
       });
       it('fails to sign up user with response Status 422', () => {
         const expected = 422;
@@ -184,8 +182,7 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against wrong email format');
-        done();
+        done(console.log('Test complete against wrong email format'));
       });
       it('fails to sign up user with response Status 422', () => {
         const expected = 422;
@@ -220,8 +217,7 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against wrong password format');
-        done();
+        done(console.log('Test complete against wrong password format'));
       });
       it('fails to sign up user with response Status 422', () => {
         const expected = 422;
@@ -256,8 +252,7 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against wrong phone number format');
-        done();
+        done(console.log('Test complete against wrong phone number format'));
       });
       it('fails to sign up user with response Status 422', () => {
         const expected = 422;
@@ -273,8 +268,8 @@ describe('Server', () => {
       userSignupRequest = {
         firstName: 'testFirstName',
         lastName: 'testLastName',
-        email: 'tryUser@howmies.com',
-        phone: '+2349012345678',
+        email: 'johndoe@howmies.com',
+        phone: '+2348012345678',
         password: 'testPassword',
       };
       const options = {
@@ -292,15 +287,14 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against already existing email');
-        done();
+        done(console.log('Test complete against already existing email'));
       });
-      it('fails to sign up user with response Status 406', () => {
-        const expected = 406;
+      it('fails to sign up user with response Status 403', () => {
+        const expected = 403;
         expect(result.status).toBe(expected);
       });
       it('fails to sign up user with response message', () => {
-        const expected = 'Account already in use';
+        const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
         expect(result.message).toBe(expected);
       });
     });
@@ -328,17 +322,16 @@ describe('Server', () => {
       });
 
       afterEach((done) => {
-        console.log('Test complete against already existing phone number');
-        done();
+        done(console.log('Test complete against already existing phone number'));
       });
 
-      it('fails to sign up user with response Status 406', () => {
-        const expected = 406;
+      it('fails to sign up user with response Status 403', () => {
+        const expected = 403;
         expect(result.status).toBe(expected);
       });
 
       it('fails to sign up user with response message', () => {
-        const expected = 'Account already in use';
+        const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
         expect(result.message).toBe(expected);
       });
     });

@@ -20,6 +20,32 @@ module.exports = async (req, response) => {
     password,
   } = req.body;
 
+  const existingUser = await pool.query('SELECT email, phone FROM users WHERE email=$1 OR phone=$2',
+    [email, phone])
+    .then((result) => {
+      if (result.rows && result.rows.length > 0) {
+        return {
+          error: {
+            status: 403,
+            message: 'Account already in use. Try to login with your email and password. Or register with another email or phone number',
+          },
+        };
+      }
+    })
+    .catch(() => ({
+      error: {
+        status: 500,
+        message: 'Internal Server Error. Try again',
+      },
+    }));
+
+  if (existingUser && existingUser.error) {
+    return response.status(existingUser.error.status).send({
+      remark: 'Error',
+      message: existingUser.error.message,
+    });
+  }
+
   const passwordCrypt = bcrypt.hashSync(password, salt);
 
   const user = await pool.query(
@@ -51,7 +77,7 @@ module.exports = async (req, response) => {
     .catch((err) => ({
       error: err.message.includes('duplicate')
         ? {
-          status: 406,
+          status: 403,
           message: 'Account already in use',
         } : {
           status: 500,
