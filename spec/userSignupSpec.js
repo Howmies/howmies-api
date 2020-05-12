@@ -10,26 +10,23 @@ const testTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
 describe('POST /auth/users/signup', () => {
   beforeAll((done) => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
-    pool.query('TRUNCATE TABLE users CASCADE', [], (err) => {
-      if (err) { return done(console.error(`\nError truncating users table - ${err.message}\n`)); }
-      console.log('\n- users table truncated -\n');
 
-      pool.query(
-        `INSERT INTO users(first_name, last_name, email, phone, password, register_date)
-        VALUES($1, $2, $3, $4, $5, $6)
-        RETURNING *`,
-        ['John', 'Doe', 'johndoe@howmies.com', '+2348012345678', 'testPassword100', Date.now()],
-        (err1) => {
-          if (err1) { return done(console.error(`\nError adding persistent user - ${err1.message}\n`)); }
-          done(console.error('\nPersistent user craeted\n'));
-        },
-      );
-    });
+    pool.query(
+      `INSERT INTO users(first_name, last_name, email, phone, password, register_date)
+      SELECT $1, $2, $3, $4, $5, $6
+      WHERE NOT EXISTS (
+        SELECT 1 FROM users WHERE email='johndoe@howmies.com' OR phone='+2348012345678'
+      );`,
+      ['John', 'Doe', 'johndoe@howmies.com', '+2348012345678', 'testPassword100', Date.now()],
+      (err) => {
+        if (err) { return done(console.error(`\nError adding persistent user - ${err.message}\n`)); }
+        done(console.error('\nPersistent user created\n'));
+      },
+    );
   });
-  afterAll((done) => {
+  afterAll(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = testTimeout;
     console.log('\x1b[42m\x1b[30m', 'Finished user-signup unit tests\x1b[0m\n');
-    done();
   });
 
   const uri = `http://localhost:${process.env.PORT}/api/v0.0.1/auth/users/signup`;
@@ -334,7 +331,7 @@ describe('POST /auth/users/signup', () => {
       firstName: 'testFirstName',
       lastName: 'testLastName',
       email: 'johndoe@howmies.com',
-      phone: '+2349012345679',
+      phone: '+2349012345678',
       password: 'testPassword',
     };
 
