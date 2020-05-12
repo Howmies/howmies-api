@@ -8,8 +8,23 @@ dotenv.config();
 const testTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
 
 describe('POST /auth/users/signup', () => {
-  beforeAll(() => {
+  beforeAll((done) => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    pool.query('TRUNCATE TABLE users CASCADE', [], (err) => {
+      if (err) { return done(console.error(`\nError truncating users table - ${err.message}\n`)); }
+      console.log('\n- users table truncated -\n');
+
+      pool.query(
+        `INSERT INTO users(first_name, last_name, email, phone, password, register_date)
+        VALUES($1, $2, $3, $4, $5, $6)
+        RETURNING *`,
+        ['John', 'Doe', 'johndoe@howmies.com', '+2348012345678', 'testPassword100', Date.now()],
+        (err1) => {
+          if (err1) { return done(console.error(`\nError adding persistent user - ${err1.message}\n`)); }
+          done(console.error('\nPersistent user craeted\n'));
+        },
+      );
+    });
   });
   afterAll((done) => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = testTimeout;
@@ -46,8 +61,8 @@ describe('POST /auth/users/signup', () => {
     afterEach((done) => {
       pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
         if (err) { return console.error(`Error deleting from database - ${err.message}`); }
-        console.log('Test complete for fully correct data format');
-        done();
+
+        done(console.log('Test complete for fully correct data format'));
       });
     });
 
@@ -90,8 +105,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against user\'s name too long');
-      done();
+      done(console.log('Test complete against user\'s name too long'));
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -132,8 +146,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against excluded required data');
-      done();
+      done(console.log('Test complete against excluded required data'));
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -175,8 +188,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against empty required data');
-      done();
+      done(console.log('Test complete against empty required data'));
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -217,8 +229,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against wrong email format');
-      done();
+      done(console.log('Test complete against wrong email format'));
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -259,8 +270,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against wrong password format');
-      done();
+      done(console.log('Test complete against wrong password format'));
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -301,8 +311,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against wrong phone number format');
-      done();
+      done(console.log('Test complete against wrong phone number format'));
     });
 
     it('fails to sign up user with response Status 422', (done) => {
@@ -324,8 +333,8 @@ describe('POST /auth/users/signup', () => {
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
-      email: 'tryUser@howmies.com',
-      phone: '+2349012345678',
+      email: 'johndoe@howmies.com',
+      phone: '+2349012345679',
       password: 'testPassword',
     };
 
@@ -344,8 +353,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against already existing email');
-      done();
+      done(console.log('Test complete against already existing email'));
     });
 
     it('fails to sign up user with response Status 406', (done) => {
@@ -386,8 +394,7 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach((done) => {
-      console.log('Test complete against already existing phone number');
-      done();
+      done(console.log('Test complete against already existing phone number'));
     });
 
     it('fails to sign up user with response Status 406', (done) => {
