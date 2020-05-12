@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users
     other_details text COLLATE pg_catalog."default",
     password character varying(1024) COLLATE pg_catalog."default",
     last_name character varying(24) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT clients_pkey PRIMARY KEY (id),
-    CONSTRAINT clients_client_email_key UNIQUE (email),
-    CONSTRAINT clients_client_phone_number_key UNIQUE (phone)
+    CONSTRAINT users_pkey PRIMARY KEY (id),
+    CONSTRAINT users_email_key UNIQUE (email),
+    CONSTRAINT users_phone_key UNIQUE (phone)
 )
