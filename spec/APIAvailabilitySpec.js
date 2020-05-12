@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const dotenv = require('dotenv');
 const request = require('request');
 require('../server');

@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const dotenv = require('dotenv');
 const request = require('request');
 const pool = require('../middleware/configs/elephantsql');
@@ -58,21 +60,16 @@ describe('POST /auth/users/signup', () => {
     afterEach((done) => {
       pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
         if (err) { return console.error(`Error deleting from database - ${err.message}`); }
-
         done(console.log('Test complete for fully correct data format'));
       });
     });
-
-    it('successfully signs up user with response Status 200', (done) => {
+    it('successfully signs up user with response Status 200', () => {
       const expected = 200;
       expect(result.status).toBe(expected);
-      done();
     });
-
-    it('successfully signs up user with success response message', (done) => {
+    it('successfully signs up user with success response message', () => {
       const expected = 'Successfully logged in';
       expect(result.message).toBe(expected);
-      done();
     });
   });
 
@@ -203,6 +200,7 @@ describe('POST /auth/users/signup', () => {
 
   describe('with wrong email format', () => {
     const result = {};
+
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
@@ -244,6 +242,7 @@ describe('POST /auth/users/signup', () => {
 
   describe('with wrong password format', () => {
     const result = {};
+
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
@@ -331,7 +330,7 @@ describe('POST /auth/users/signup', () => {
       firstName: 'testFirstName',
       lastName: 'testLastName',
       email: 'johndoe@howmies.com',
-      phone: '+2349012345678',
+      phone: '+2348012345678',
       password: 'testPassword',
     };
 
@@ -353,21 +352,20 @@ describe('POST /auth/users/signup', () => {
       done(console.log('Test complete against already existing email'));
     });
 
-    it('fails to sign up user with response Status 406', (done) => {
-      const expected = 406;
+    it('fails to sign up user with response Status 403', () => {
+      const expected = 403;
       expect(result.status).toBe(expected);
-      done();
     });
 
-    it('fails to sign up user with response message', (done) => {
-      const expected = 'Account already in use';
+    it('fails to sign up user with response message', () => {
+      const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
       expect(result.message).toBe(expected);
-      done();
     });
   });
 
   describe('with already existing phone number', () => {
     const result = {};
+
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
@@ -394,16 +392,14 @@ describe('POST /auth/users/signup', () => {
       done(console.log('Test complete against already existing phone number'));
     });
 
-    it('fails to sign up user with response Status 406', (done) => {
-      const expected = 406;
+    it('fails to sign up user with response Status 403', () => {
+      const expected = 403;
       expect(result.status).toBe(expected);
-      done();
     });
 
-    it('fails to sign up user with response message', (done) => {
-      const expected = 'Account already in use';
+    it('fails to sign up user with response message', () => {
+      const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
       expect(result.message).toBe(expected);
-      done();
     });
   });
 });

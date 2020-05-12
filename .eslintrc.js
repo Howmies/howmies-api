@@ -18,8 +18,8 @@ module.exports = {
   },
   "rules": {
     "linebreak-style": ["error", platform === "linux" ? "unix" : "windows"],
-    "indent": ["error", 2],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
     "no-restricted-globals": 0,
-    "consistent-return": 0
+    "consistent-return": 0,
   }
 };
