@@ -57,21 +57,21 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-      afterEach((done) => {
-        pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
-          if (err) { return console.error(`Error deleting from database - ${err.message}`); }
-          done(console.log('Test complete for fully correct data format'));
-        });
-      });
-      it('successfully signs up user with response Status 200', () => {
-        const expected = 200;
-        expect(result.status).toBe(expected);
-      });
-      it('successfully signs up user with success response message', () => {
-        const expected = 'Successfully logged in';
-        expect(result.message).toBe(expected);
+    afterEach((done) => {
+      pool.query('delete from users where email=$1', ['testuseremail@howmies.com'], (err) => {
+        if (err) { return console.error(`Error deleting from database - ${err.message}`); }
+        done(console.log('Test complete for fully correct data format'));
       });
     });
+    it('successfully signs up user with response Status 200', () => {
+      const expected = 200;
+      expect(result.status).toBe(expected);
+    });
+    it('successfully signs up user with success response message', () => {
+      const expected = 'Successfully logged in';
+      expect(result.message).toBe(expected);
+    });
+  });
 
   describe('with user\'s name too long', () => {
     const result = {};
@@ -200,7 +200,7 @@ describe('POST /auth/users/signup', () => {
 
   describe('with wrong email format', () => {
     const result = {};
-    
+
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
@@ -242,7 +242,7 @@ describe('POST /auth/users/signup', () => {
 
   describe('with wrong password format', () => {
     const result = {};
-    
+
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
@@ -306,7 +306,7 @@ describe('POST /auth/users/signup', () => {
       });
     });
 
-afterEach((done) => {
+    afterEach((done) => {
       done(console.log('Test complete against wrong phone number format'));
     });
 
@@ -323,46 +323,49 @@ afterEach((done) => {
     });
   });
 
-    describe('with already existing email', () => {
-      userSignupRequest = {
-        firstName: 'testFirstName',
-        lastName: 'testLastName',
-        email: 'johndoe@howmies.com',
-        phone: '+2348012345678',
-        password: 'testPassword',
-      };
-      const options = {
-        method: 'POST',
-        body: userSignupRequest,
-        json: true,
-      };
+  describe('with already existing email', () => {
+    const result = {};
 
-      beforeEach((done) => {
-        request(uri, options, (error, response, body) => {
-          result.status = response.statusCode;
-          result.message = body.message;
-          done();
-        });
-      });
+    const userSignupRequest = {
+      firstName: 'testFirstName',
+      lastName: 'testLastName',
+      email: 'johndoe@howmies.com',
+      phone: '+2348012345678',
+      password: 'testPassword',
+    };
 
-      afterEach((done) => {
-        done(console.log('Test complete against already existing email'));
+    const options = {
+      method: 'POST',
+      body: userSignupRequest,
+      json: true,
+    };
+
+    beforeEach((done) => {
+      request(uri, options, (error, response, body) => {
+        result.status = response.statusCode;
+        result.message = body.message;
+        done();
       });
-      
-      it('fails to sign up user with response Status 403', () => {
-        const expected = 403;
-        expect(result.status).toBe(expected);
-      });
-      
-      it('fails to sign up user with response message', () => {
-        const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
-        expect(result.message).toBe(expected);
-      });
+    });
+
+    afterEach((done) => {
+      done(console.log('Test complete against already existing email'));
+    });
+
+    it('fails to sign up user with response Status 403', () => {
+      const expected = 403;
+      expect(result.status).toBe(expected);
+    });
+
+    it('fails to sign up user with response message', () => {
+      const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
+      expect(result.message).toBe(expected);
+    });
   });
 
   describe('with already existing phone number', () => {
     const result = {};
-    
+
     const userSignupRequest = {
       firstName: 'testFirstName',
       lastName: 'testLastName',
@@ -389,14 +392,14 @@ afterEach((done) => {
       done(console.log('Test complete against already existing phone number'));
     });
 
-      it('fails to sign up user with response Status 403', () => {
-        const expected = 403;
-        expect(result.status).toBe(expected);
-      });
+    it('fails to sign up user with response Status 403', () => {
+      const expected = 403;
+      expect(result.status).toBe(expected);
+    });
 
-      it('fails to sign up user with response message', () => {
-        const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
-        expect(result.message).toBe(expected);
+    it('fails to sign up user with response message', () => {
+      const expected = 'Account already in use. Try to login with your email and password. Or register with another email or phone number';
+      expect(result.message).toBe(expected);
     });
   });
 });
