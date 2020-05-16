@@ -32,4 +32,4 @@ deploy:
     app: howmies-api-develop
     on:
       repo: Howmies/howmies-api
-      branch: develop
+      branch: bg-cookie-#73

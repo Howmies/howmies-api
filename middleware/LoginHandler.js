@@ -56,10 +56,6 @@ module.exports = class {
       httpOnly: true,
     };
 
-    if (process.env.DOMAIN_NAME !== 'howmies.com') {
-      delete cookieOptions.domain;
-    }
-
     // log user in
 
     const loggedUser = pool.query(
