@@ -20,6 +20,7 @@ const FacebookLogin = require('./routes/FacebookLogin');
 const GoogleLogin = require('./routes/GoogleLogin');
 
 app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Credentials', 'include');
   res.setHeader('Access-Control-Allow-Origin', process.env.ACCESS_CONTROL_ALLOW_ORIGIN);
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization, Set-Cookie');
@@ -28,7 +29,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors({ credentials: true }));
+app.use(cors({
+  origin: process.env.ACCESS_CONTROL_ALLOW_ORIGIN,
+  credentials: true,
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
