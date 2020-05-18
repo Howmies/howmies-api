@@ -54,8 +54,8 @@ module.exports = class {
       path: '/api/v0.0.1/auth/refresh_token',
       domain: process.env.DOMAIN_NAME,
       httpOnly: true,
-      sameSite: 'none',
-      secure: true,
+      // sameSite: 'none',
+      // secure: true,
     };
 
     // log user in
