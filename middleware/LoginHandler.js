@@ -53,7 +53,7 @@ module.exports = class {
       maxAge: 3600000 * 24 * 30,
       path: '/api/v0.0.1/auth/refresh_token',
       domain: process.env.DOMAIN_NAME,
-      httpOnly: true,
+      httpOnly: false,
       // sameSite: 'none',
       // secure: true,
     };
