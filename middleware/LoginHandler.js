@@ -100,8 +100,7 @@ module.exports = class {
     return res
       .status(200)
       .cookie('HURT', refreshToken, cookieOptions)
-      .set('Authorization', accessToken)
-      .set('Refresh', refreshToken)
+      .set('Authorization', JSON.stringify({ accessToken, refreshToken }))
       .send({
         message: 'Successfully logged in',
         data: {
