@@ -23,7 +23,7 @@ module.exports = class {
 
     const { uid } = this;
 
-    const expiresIn = 1500;
+    const expiresIn = 10;
     const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
     const aud = 'in-app Facebook user';
     const iss = 'Howmies Entreprise';
@@ -54,8 +54,8 @@ module.exports = class {
       path: '/api/v0.0.1/auth/refresh_token',
       domain: process.env.DOMAIN_NAME,
       httpOnly: false,
-      // sameSite: 'none',
-      // secure: true,
+      sameSite: 'none',
+      secure: true,
     };
 
     // log user in
@@ -101,6 +101,7 @@ module.exports = class {
       .status(200)
       .cookie('HURT', refreshToken, cookieOptions)
       .set('Authorization', accessToken)
+      .set('Refresh', refreshToken)
       .send({
         message: 'Successfully logged in',
         data: {
