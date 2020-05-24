@@ -12,7 +12,7 @@ module.exports = async (req, response) => {
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   // verify token validation
-  const token = req.cookies.HURT;
+  const token = req.cookies.hurt;
 
   const tokenVerification = jwt.verify(
     token,
