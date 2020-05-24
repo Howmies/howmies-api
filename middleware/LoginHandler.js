@@ -23,7 +23,7 @@ module.exports = class {
 
     const { uid } = this;
 
-    const expiresIn = 1500;
+    const expiresIn = 10;
     const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
     const aud = 'in-app Facebook user';
     const iss = 'Howmies Entreprise';
@@ -52,13 +52,11 @@ module.exports = class {
     const cookieOptions = {
       maxAge: 3600000 * 24 * 30,
       path: '/api/v0.0.1/auth/refresh_token',
-      domain: `.${process.env.DOMAIN_NAME}`,
-      httpOnly: true,
+      domain: process.env.DOMAIN_NAME,
+      httpOnly: false,
+      sameSite: 'none',
+      secure: true,
     };
-
-    if (process.env.DOMAIN_NAME !== 'howmies.com') {
-      delete cookieOptions.domain;
-    }
 
     // log user in
 
@@ -102,7 +100,7 @@ module.exports = class {
     return res
       .status(200)
       .cookie('HURT', refreshToken, cookieOptions)
-      .set('Authorization', accessToken)
+      .set('Authorization', JSON.stringify({ accessToken, refreshToken }))
       .send({
         message: 'Successfully logged in',
         data: {
