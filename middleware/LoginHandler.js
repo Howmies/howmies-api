@@ -50,8 +50,8 @@ module.exports = class {
       path: '/api/v0.0.1/auth/refresh_token',
       domain: process.env.DOMAIN_NAME,
       httpOnly: false,
-      // sameSite: 'none',
-      // secure: true,
+      sameSite: 'none',
+      secure: true,
     };
 
     this.accessToken = accessToken;
