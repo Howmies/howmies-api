@@ -79,7 +79,7 @@ module.exports = async (req, response) => {
   const aud = 'user';
   const iss = 'Howmies Entreprise';
   const algorithm = 'HS256';
-  const accessToken = jwt.sign(
+  const newAccessToken = jwt.sign(
     {
       iss, aud, uid: tokenVerification.uid,
     },
@@ -108,7 +108,7 @@ module.exports = async (req, response) => {
 
   response.status(200)
     .cookie('HURT', newRefreshToken, cookieOptions)
-    .set('Authorization', JSON.stringify({ accessToken, newRefreshToken }))
+    .set('Authorization', JSON.stringify({ newAccessToken, newRefreshToken }))
     .send({
       message: 'Session refresh successful',
     });
