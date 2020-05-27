@@ -12,16 +12,19 @@ module.exports = async (req, response) => {
   if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
 
   // verify token validation
-  const token = req.cookies.HURT;
+
+  const refreshToken = req.cookies.HURT;
+
+  // const { refreshToken } = req.headers.Authorization;
 
   const tokenVerification = jwt.verify(
-    token,
+    refreshToken,
     privateKey,
     {
       algorithms: ['HS256'],
       audience: 'user',
       issuer: 'Howmies Entreprise',
-      ignoreExpiration: true,
+      // ignoreExpiration: true,
     },
     (err, result) => {
       if (err) {
@@ -34,6 +37,8 @@ module.exports = async (req, response) => {
           return { expiration };
         }
       }
+
+      return result;
     },
   );
 
@@ -49,7 +54,7 @@ module.exports = async (req, response) => {
     // remove expired refresh token from database to fully logout user
     const logout = await pool.query(
       'DELETE FROM logged_users WHERE refresh_token=$1',
-      [token],
+      [refreshToken],
     )
       .then(() => null)
       .catch(() => ({ error: 'Internal Server Error. Try again' }));
@@ -66,41 +71,45 @@ module.exports = async (req, response) => {
   }
 
   // for valid token
-  // check for user ID to be used in new token
-  const uid = await pool.query(
-    'SELECT user_id FROM logged_users WHERE refresh_token=$1',
-    [token],
-  )
-    .then((result) => {
-      if (result.rows && result.rows.length > 0) {
-        return result.rows[0].user_id;
-      }
-    })
-    .catch(() => null);
-
-  // handle scenario for token absent from database
-  if (!uid) {
-    return response.status(500).send({
-      remark: 'Error',
-      message: 'Internal Server Error',
-    });
-  }
 
   // for valid refresh token
-  // sign new access token
+  // sign new tokens
+  // sign access token
   const expiresIn = 1500;
   const aud = 'user';
   const iss = 'Howmies Entreprise';
   const algorithm = 'HS256';
   const accessToken = jwt.sign(
     {
-      iss, aud, uid,
+      iss, aud, uid: tokenVerification.uid,
     },
     privateKey,
     { expiresIn, algorithm },
   );
 
-  response.status(200).set('Authorization', accessToken).send({
-    message: 'Session refresh successful',
-  });
+  // sign refresh token
+  const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
+  const newRefreshToken = jwt.sign(
+    { exp, uid: tokenVerification.uid },
+    privateKey,
+    { algorithm, issuer: iss, audience: aud },
+  );
+
+  // set cookie options
+
+  const cookieOptions = {
+    maxAge: 3600000 * 24 * 30,
+    path: '/api/v0.0.1/auth/refresh_token',
+    domain: process.env.DOMAIN_NAME,
+    httpOnly: false,
+    sameSite: 'none',
+    secure: true,
+  };
+
+  response.status(200)
+    .cookie('HURT', refreshToken, cookieOptions)
+    .set('Authorization', JSON.stringify({ accessToken, newRefreshToken }))
+    .send({
+      message: 'Session refresh successful',
+    });
 };

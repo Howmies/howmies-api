@@ -1,7 +1,6 @@
 const passport = require('passport');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const pool = require('./configs/elephantsql');
 
 dotenv.config();
 
@@ -18,16 +17,13 @@ passport.deserializeUser((obj, done) => {
 // hash user password or external passport id
 
 module.exports = class {
-  constructor() {
+  constructor(uid) {
     // user token options
 
-    const { uid } = this;
-
-    const expiresIn = 10;
+    const expiresIn = 600;
     const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
-    const aud = 'in-app Facebook user';
+    const aud = 'user';
     const iss = 'Howmies Entreprise';
-    const data = 'refresh in-app Facebook user';
     const algorithm = 'HS256';
 
     const tokenKeys = {
@@ -42,7 +38,7 @@ module.exports = class {
     );
 
     const refreshToken = jwt.sign(
-      { exp, data },
+      { exp, uid },
       tokenKeys.keyPrivate,
       { algorithm, issuer: iss, audience: aud },
     );
@@ -54,47 +50,22 @@ module.exports = class {
       path: '/api/v0.0.1/auth/refresh_token',
       domain: process.env.DOMAIN_NAME,
       httpOnly: false,
-      sameSite: 'none',
-      secure: true,
+      // sameSite: 'none',
+      // secure: true,
     };
 
-    // log user in
-
-    const loggedUser = pool.query(
-      'INSERT INTO logged_users(user_id, refresh_token) VALUES($1, $2)',
-      [uid, refreshToken],
-    )
-      .then(() => null)
-      .catch((err) => {
-        if (!err) {
-          return { error: 'Internal Server Error' };
-        }
-      });
-
-    this.loggedUser = loggedUser;
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.cookieOptions = cookieOptions;
     this.expiresIn = expiresIn;
     this.exp = exp;
+    this.uid = uid;
   }
 
-  successResponse(res) {
-    const { confirmedLogin } = this;
-
-    if (confirmedLogin && confirmedLogin.error) {
-      if (this.done) {
-        return this.done(confirmedLogin.error);
-      }
-      return res.status(406).send({
-        remark: 'Error',
-        message: confirmedLogin.error,
-      });
-    }
-
+  successResponse(res, username, telephone, email) {
     const {
       accessToken, refreshToken, cookieOptions, uid,
-      username, telephone, email, expiresIn, exp,
+      expiresIn, exp,
     } = this;
 
     return res
