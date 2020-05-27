@@ -107,7 +107,7 @@ module.exports = async (req, response) => {
   };
 
   response.status(200)
-    .cookie('HURT', refreshToken, cookieOptions)
+    .cookie('HURT', newRefreshToken, cookieOptions)
     .set('Authorization', JSON.stringify({ accessToken, newRefreshToken }))
     .send({
       message: 'Session refresh successful',
