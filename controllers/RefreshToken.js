@@ -103,7 +103,7 @@ module.exports = async (req, response) => {
     domain: process.env.DOMAIN_NAME,
     httpOnly: false,
     sameSite: 'none',
-    secure: true,
+    // secure: true,
   };
 
   response.status(200)

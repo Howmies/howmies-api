@@ -51,7 +51,7 @@ module.exports = class {
       domain: process.env.DOMAIN_NAME,
       httpOnly: false,
       sameSite: 'none',
-      secure: true,
+      // secure: true,
     };
 
     this.accessToken = accessToken;
