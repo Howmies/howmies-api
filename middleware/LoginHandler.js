@@ -1,6 +1,7 @@
 const passport = require('passport');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
+// const pool = require('../middleware/configs/elephantsql');
 
 dotenv.config();
 
@@ -17,11 +18,10 @@ passport.deserializeUser((obj, done) => {
 // hash user password or external passport id
 
 module.exports = class {
-  constructor(uid) {
+  constructor(uid, username, telephone, email, done) {
     // user token options
 
-    const expiresIn = 600;
-    const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
+    const expiresIn = 60;
     const aud = 'user';
     const iss = 'Howmies Entreprise';
     const algorithm = 'HS256';
@@ -37,8 +37,14 @@ module.exports = class {
       { expiresIn, algorithm },
     );
 
+    const exp = Math.floor(Date.now() / 1000) + 3600000 * 24 * 30;
+    const data = {
+      username,
+      telephone,
+      email,
+    };
     const refreshToken = jwt.sign(
-      { exp, uid },
+      { exp, uid, data },
       tokenKeys.keyPrivate,
       { algorithm, issuer: iss, audience: aud },
     );
@@ -60,12 +66,18 @@ module.exports = class {
     this.expiresIn = expiresIn;
     this.exp = exp;
     this.uid = uid;
+
+    this.username = username;
+    this.telephone = telephone;
+    this.email = email;
+
+    this.done = done;
   }
 
-  successResponse(res, username, telephone, email) {
+  successResponse(res) {
     const {
       accessToken, refreshToken, cookieOptions, uid,
-      expiresIn, exp,
+      expiresIn, username, telephone, email,
     } = this;
 
     return res
@@ -80,7 +92,6 @@ module.exports = class {
           telephone,
           email,
           expiresIn: `${expiresIn}s`,
-          refreshIn: `${exp}s`,
         },
       });
   }

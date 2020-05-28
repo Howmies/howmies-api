@@ -48,7 +48,7 @@ module.exports = async (req, response) => {
     uid, name, telephone, emailAddress,
   } = user.data;
 
-  const loginProcessor = new LoginProcessor(uid);
+  const loginProcessor = new LoginProcessor(uid, name, telephone, emailAddress);
 
-  loginProcessor.successResponse(response, name, telephone, emailAddress);
+  loginProcessor.successResponse(response);
 };

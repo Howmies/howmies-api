@@ -15,8 +15,6 @@ const salt = bcrypt.genSaltSync(10);
 
 const cryptedFacebookID = (facebookID) => bcrypt.hashSync(facebookID, salt);
 
-const loginProcessor = new LoginProcessor();
-
 const registerFacebookUser = async (firstName, lastName, email, facebookID, done) => {
   await pool.query(
     `INSERT INTO users(first_name, last_name, email, password, register_date)
@@ -34,12 +32,12 @@ const registerFacebookUser = async (firstName, lastName, email, facebookID, done
         return done(err);
       }
 
-      loginProcessor.done = done;
-      loginProcessor.uid = result.rows[0].id;
-      loginProcessor.confirmedLogin = await loginProcessor.loggedUser;
-      loginProcessor.username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
-      loginProcessor.telephone = '';
-      loginProcessor.email = result.rows[0].email;
+      const uid = result.rows[0].id;
+      const username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
+      const telephone = '';
+      const userEmail = result.rows[0].email;
+
+      const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail, done);
 
       const user = { loginProcessor };
 
@@ -66,12 +64,12 @@ const checkRegisteredUser = async (email, done, firstName, lastName, facebookID)
       }
 
       if (result.rows && result.rows.length === 1) {
-        loginProcessor.done = done;
-        loginProcessor.uid = result.rows[0].id;
-        loginProcessor.confirmedLogin = await loginProcessor.loggedUser;
-        loginProcessor.username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
-        loginProcessor.telephone = '';
-        loginProcessor.email = result.rows[0].email;
+        const uid = result.rows[0].id;
+        const username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
+        const telephone = '';
+        const userEmail = result.rows[0].email;
+
+        const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail, done);
 
         const user = { loginProcessor };
 
