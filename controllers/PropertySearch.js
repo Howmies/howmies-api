@@ -1,6 +1,5 @@
 const { validationResult } = require('express-validator');
-const BasicPropertySearch = require('../middleware/PropertySeacrh/PropertySearch');
-const PropertySearchWithFeatures = require('../middleware/PropertySeacrh/PropertySearchWithFeatures');
+const BasicPropertySearch = require('../middleware/PropertySearch');
 
 module.exports = async (req, response) => {
   const errors = validationResult(req);
@@ -9,38 +8,20 @@ module.exports = async (req, response) => {
   const { pagination } = req.params;
 
   const {
-    location, type, features,
+    location, type,
   } = req.query;
 
-  if (features) {
-    const propertySearchWithFeatures = new PropertySearchWithFeatures(
-      response, pagination, features,
-    );
+  const basicPropertySearch = new BasicPropertySearch(response, pagination);
 
-    if (location && type) {
-      return propertySearchWithFeatures.byLocationAndPropertyType(location, type);
-    }
+  if (location && type) {
+    return basicPropertySearch.byLocationAndPropertyType(location, type);
+  }
 
-    if (location) {
-      return propertySearchWithFeatures.byLocation(location);
-    }
+  if (location) {
+    return basicPropertySearch.byLocation(location);
+  }
 
-    if (type) {
-      return propertySearchWithFeatures.byPropertyType(type);
-    }
-  } else {
-    const basicPropertySearch = new BasicPropertySearch(response, pagination);
-
-    if (location && type) {
-      return basicPropertySearch.byLocationAndPropertyType(location, type);
-    }
-
-    if (location) {
-      return basicPropertySearch.byLocation(location);
-    }
-
-    if (type) {
-      return basicPropertySearch.byPropertyType(type);
-    }
+  if (type) {
+    return basicPropertySearch.byPropertyType(type);
   }
 };

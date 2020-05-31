@@ -22,11 +22,4 @@ exports.propertyHuntValidator = [
     .withMessage('Type field was sent empty')
     .customSanitizer((value) => value.toLowerCase())
     .escape(),
-  query('features.*')
-    .optional()
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Features field was sent empty')
-    .customSanitizer((value) => value.toLowerCase())
-    .escape(),
 ];

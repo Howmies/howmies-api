@@ -1,4 +1,4 @@
-const pool = require('../configs/elephantsql');
+const pool = require('./configs/elephantsql');
 
 module.exports = class {
   /**
@@ -46,7 +46,10 @@ module.exports = class {
    */
   byLocation(location) {
     return pool.query(
-      'SELECT * from properties WHERE state=$1 OR lga=$1 ORDER BY property_id DESC OFFSET $2 LIMIT 10',
+      `SELECT * from properties AS p, features as f, properties_features as pf
+      WHERE ((p.state=$1 OR p.lga=$1) AND pf.property_id=p.property_id AND pf.feature_id=f.id)
+      OR ((p.state=$1 OR p.lga=$1) AND p.property_id NOT IN (SELECT property_id FROM properties_features))
+      ORDER BY p.post_date DESC OFFSET $2 LIMIT 10`,
       [location, this.pagination],
       this.resultResponse,
     );
@@ -59,7 +62,10 @@ module.exports = class {
    */
   byPropertyType(type) {
     pool.query(
-      'SELECT * from properties AS p, property_types as pt WHERE property_type=pt.id AND pt.property_name=$1 ORDER BY property_id DESC OFFSET $2 LIMIT 10',
+      `SELECT * from properties AS p, features as f, properties_features as pf, property_types as t
+      WHERE (p.property_type=t.id AND t.property_name=$1 AND pf.property_id=p.property_id AND pf.feature_id=f.id)
+      OR (p.property_type=t.id AND t.property_name=$1 AND p.property_id NOT IN (SELECT property_id FROM properties_features))
+      ORDER BY p.post_date DESC OFFSET $2 LIMIT 10`,
       [type, this.pagination],
       this.resultResponse,
     );
@@ -73,7 +79,10 @@ module.exports = class {
    */
   byLocationAndPropertyType(location, type) {
     pool.query(
-      'SELECT * from properties AS p, property_types as pt WHERE (p.state=$1 OR p.lga=$1) AND p.property_type=pt.id AND pt.property_name=$2 ORDER BY property_id DESC OFFSET $3 LIMIT 10',
+      `SELECT * FROM properties AS p, features as f, properties_features as pf, property_types as t
+      WHERE ((p.state=$1 OR p.lga=$1) AND p.property_type=t.id AND t.property_name=$2 AND pf.property_id=p.property_id AND pf.feature_id=f.id)
+      OR ((p.state=$1 OR p.lga=$1) AND p.property_type=t.id AND t.property_name=$2 AND p.property_id NOT IN (SELECT property_id FROM properties_features))
+      ORDER BY p.post_date DESC OFFSET $3 LIMIT 10`,
       [location, type, this.pagination],
       this.resultResponse,
     );
