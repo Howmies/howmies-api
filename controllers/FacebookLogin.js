@@ -27,9 +27,12 @@ const registerFacebookUser = async (firstName, lastName, email, facebookID, done
       cryptedFacebookID(facebookID),
       Date.now(),
     ],
-    async (err, result) => {
+    (err, result) => {
       if (err || (result.rows && result.rows.length === 0)) {
-        return done(err);
+        return done(JSON.stringify({
+          remark: 'Error',
+          message: 'Internal server error',
+        }));
       }
 
       const uid = result.rows[0].id;
@@ -54,9 +57,12 @@ const checkRegisteredUser = async (email, done, firstName, lastName, facebookID)
   await pool.query(
     'SELECT * FROM users WHERE email=$1',
     [email],
-    async (err, result) => {
+    (err, result) => {
       if (err) {
-        return done(err);
+        return done(JSON.stringify({
+          remark: 'Error',
+          message: 'Internal server error',
+        }));
       }
 
       if (result.rows && result.rows.length === 0) {

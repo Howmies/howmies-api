@@ -19,9 +19,9 @@ passport.deserializeUser((obj, done) => {
 
 module.exports = class {
   constructor(uid, username, telephone, email, done) {
-    // user token options
+    // user access token options
 
-    const expiresIn = 60;
+    const expiresIn = 15;
     const aud = 'user';
     const iss = 'Howmies Entreprise';
     const algorithm = 'HS256';
@@ -37,12 +37,16 @@ module.exports = class {
       { expiresIn, algorithm },
     );
 
-    const exp = Math.floor(Date.now() / 1000) + 3600000 * 24 * 30;
+    // user refresh token options
+
+    const exp = Math.floor(Date.now() / 1000) + 30;
+
     const data = {
       username,
       telephone,
       email,
     };
+
     const refreshToken = jwt.sign(
       { exp, uid, data },
       tokenKeys.keyPrivate,
@@ -91,7 +95,7 @@ module.exports = class {
           username,
           telephone,
           email,
-          expiresIn: `${expiresIn}s`,
+          expiresIn: expiresIn * 1000,
         },
       });
   }
