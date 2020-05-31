@@ -8,7 +8,7 @@ dotenv.config();
 module.exports = async (req, res) => {
   // verify session
   const tokenVerifier = sessionValidator(
-    req.headers.authorization,
+    req.headers.Authorization,
     process.env.RSA_PRIVATE_KEY,
     'user',
   );

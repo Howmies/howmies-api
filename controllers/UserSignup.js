@@ -106,7 +106,6 @@ module.exports = async (req, response) => {
   const loginProcessor = new LoginProcessor();
 
   loginProcessor.uid = uid;
-  loginProcessor.confirmedLogin = await loginProcessor.loggedUser;
   loginProcessor.username = name;
   loginProcessor.telephone = telephone;
   loginProcessor.email = emailAddress;
