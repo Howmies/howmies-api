@@ -32,4 +32,4 @@ deploy:
     app: howmies-api-develop
     on:
       repo: Howmies/howmies-api
-      branch: bg-refresh-token-#73
+      branch: ft-property-search-#25
