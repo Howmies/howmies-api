@@ -40,7 +40,7 @@ const registerGoogleUser = async (firstName, lastName, email, googleID, done) =>
       const telephone = '';
       const userEmail = result.rows[0].email;
 
-      const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail, done);
+      const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
 
       const user = { loginProcessor };
 
@@ -75,7 +75,7 @@ const checkRegisteredUser = async (email, done, firstName, lastName, googleID) =
         const telephone = '';
         const userEmail = result.rows[0].email;
 
-        const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail, done);
+        const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
 
         const user = { loginProcessor };
 
