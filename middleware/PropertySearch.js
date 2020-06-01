@@ -46,10 +46,11 @@ module.exports = class {
    */
   byLocation(location) {
     return pool.query(
-      `SELECT * from properties AS p, features as f, properties_features as pf
-      WHERE ((p.state=$1 OR p.lga=$1) AND pf.property_id=p.property_id AND pf.feature_id=f.id)
-      OR ((p.state=$1 OR p.lga=$1) AND p.property_id NOT IN (SELECT property_id FROM properties_features))
-      ORDER BY p.post_date DESC OFFSET $2 LIMIT 10`,
+      `SELECT * FROM properties AS p
+      WHERE (p.state=$1 OR p.lga=$1) AND p.property_id IN (
+        SELECT COUNT(pf.property_id) AS property_count FROM properties_features AS pf
+        INNER JOIN features AS f ON f.id=pf.feature_id)
+      GROUP BY p.property_id ORDER BY p.post_date DESC OFFSET $2 LIMIT 10`,
       [location, this.pagination],
       this.resultResponse,
     );
@@ -62,10 +63,13 @@ module.exports = class {
    */
   byPropertyType(type) {
     pool.query(
-      `SELECT * from properties AS p, features as f, properties_features as pf, property_types as t
-      WHERE (p.property_type=t.id AND t.property_name=$1 AND pf.property_id=p.property_id AND pf.feature_id=f.id)
-      OR (p.property_type=t.id AND t.property_name=$1 AND p.property_id NOT IN (SELECT property_id FROM properties_features))
-      ORDER BY p.post_date DESC OFFSET $2 LIMIT 10`,
+      `SELECT * FROM properties AS p
+      WHERE p.property_type IN (
+        SELECT COUNT(*) FROM property_types AS t WHERE t.property_name=$1)
+      AND p.property_id IN (
+        SELECT COUNT(pf.property_id) AS property_count FROM properties_features AS pf
+        INNER JOIN features AS f ON f.id=pf.feature_id)
+      GROUP BY p.property_id ORDER BY p.post_date DESC OFFSET $2 LIMIT 10`,
       [type, this.pagination],
       this.resultResponse,
     );
@@ -79,10 +83,13 @@ module.exports = class {
    */
   byLocationAndPropertyType(location, type) {
     pool.query(
-      `SELECT * FROM properties AS p, features as f, properties_features as pf, property_types as t
-      WHERE ((p.state=$1 OR p.lga=$1) AND p.property_type=t.id AND t.property_name=$2 AND pf.property_id=p.property_id AND pf.feature_id=f.id)
-      OR ((p.state=$1 OR p.lga=$1) AND p.property_type=t.id AND t.property_name=$2 AND p.property_id NOT IN (SELECT property_id FROM properties_features))
-      ORDER BY p.post_date DESC OFFSET $3 LIMIT 10`,
+      `SELECT * FROM properties AS p
+      WHERE (p.state=$1 OR p.lga=$1) AND p.property_type IN (
+        SELECT COUNT(*) FROM property_types AS t WHERE t.property_name=$2)
+      AND p.property_id IN (
+        SELECT COUNT(pf.property_id) AS property_count FROM properties_features AS pf
+        INNER JOIN features AS f ON f.id=pf.feature_id)
+      GROUP BY p.property_id ORDER BY p.post_date DESC OFFSET $3 LIMIT 10`,
       [location, type, this.pagination],
       this.resultResponse,
     );
