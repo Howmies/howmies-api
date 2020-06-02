@@ -28,7 +28,7 @@ module.exports = class {
   constructor(uid, username, telephone, email) {
     // user access token options
 
-    const expiresIn = 15;
+    const expiresIn = 900;
     const aud = 'user';
     const iss = 'Howmies Entreprise';
     const algorithm = 'HS256';
@@ -46,7 +46,7 @@ module.exports = class {
 
     // user refresh token options
 
-    const exp = Math.floor(Date.now() / 1000) + 30;
+    const exp = Math.floor(Date.now() / 1000) + (3600 * 24 * 30);
 
     const data = {
       username,

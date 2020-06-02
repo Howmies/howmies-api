@@ -17,7 +17,7 @@ module.exports = async (req, response) => {
     return basicPropertySearch.byLocationAndPropertyType(location, type);
   }
 
-  if (location) {
+  if (location && !type) {
     return basicPropertySearch.byLocation(location);
   }
 
