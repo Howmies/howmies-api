@@ -18,28 +18,35 @@ passport.deserializeUser((obj, done) => {
 // hash user password or external passport id
 
 module.exports = class {
-  constructor(uid, username, telephone, email, done) {
+  /**
+   * Successfully log user in after all checks and other requirements have been fulfilled.
+   * @param {Number} uid The user id.
+   * @param {String} username The first name and last name of the user.
+   * @param {String} telephone The telephone number of the user.
+   * @param {String} email The email address of the user.
+   */
+  constructor(uid, username, telephone, email) {
     // user access token options
 
-    const expiresIn = 15;
+    const expiresIn = 900;
     const aud = 'user';
     const iss = 'Howmies Entreprise';
     const algorithm = 'HS256';
 
-    const tokenKeys = {
+    const tokenSecret = {
       keyPrivate: process.env.RSA_PRIVATE_KEY,
       keyPublic: process.env.RSA_PUBLIC_KEY,
     };
 
     const accessToken = jwt.sign(
       { iss, aud, uid },
-      tokenKeys.keyPrivate,
+      tokenSecret.keyPrivate,
       { expiresIn, algorithm },
     );
 
     // user refresh token options
 
-    const exp = Math.floor(Date.now() / 1000) + 30;
+    const exp = Math.floor(Date.now() / 1000) + (3600 * 24 * 30);
 
     const data = {
       username,
@@ -49,7 +56,7 @@ module.exports = class {
 
     const refreshToken = jwt.sign(
       { exp, uid, data },
-      tokenKeys.keyPrivate,
+      tokenSecret.keyPrivate,
       { algorithm, issuer: iss, audience: aud },
     );
 
@@ -74,10 +81,13 @@ module.exports = class {
     this.username = username;
     this.telephone = telephone;
     this.email = email;
-
-    this.done = done;
   }
 
+  /**
+   * Successfully log user in after all checks and other requirements have been fulfilled.
+   * @param {Response} res Express.js HTTP response.
+   * @returns {Response} Express.js HTTP response.
+   */
   successResponse(res) {
     const {
       accessToken, refreshToken, cookieOptions, uid,
