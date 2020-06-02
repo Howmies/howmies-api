@@ -51,7 +51,6 @@ module.exports.forgotPassword = async (req, res) => {
   const iss = 'Howmies Entreprise';
   const algorithm = 'HS256';
   const { uid, passwordCrypt } = user.data;
-  console.log(passwordCrypt);
 
   if (user) {
     const token = jwt.sign(
@@ -80,9 +79,9 @@ module.exports.forgotPassword = async (req, res) => {
 };
 
 // returns a form for the user to update their password
-module.exports.resetForm = (req, res) => {
+module.exports.resetForm = async (req, res) => {
   const { id, resetToken } = req.params;
-  const user = pool.query('SELECT * FROM users WHERE id=$1', [id])
+  const user = await pool.query('SELECT * FROM users WHERE id=$1', [id])
     .then((result) => {
       if (result.rows
       && result.rows.length > 0) {
@@ -93,31 +92,6 @@ module.exports.resetForm = (req, res) => {
         };
       }
     }).catch(() => ({ error: 'Internal Server Error. Try again' }));
-
-  jwt.verify(resetToken, privateKey, {
-    algorithms: ['HS256'],
-    expiresIn: '20m',
-  }, (err, decoded) => {
-    if (err && err.name === 'TokenExpiredError') {
-      const message = `
-      <!doctype html>
-        <html lang="en">
-        <head>
-        <meta charset="utf-8">
-
-        </head>
-        <body>
-      <h1>Password Reset Timeout</h1>
-      <p>Time required to perform this operation has elapsed and the link has expired.</p>
-      </body>
-      </html>
-      `;
-      res.send('Link expired');
-    }
-    if (user.data && user.data.password === decoded.passwordCrypt) {
-      res.send('Invalid link');
-    }
-  });
 
   const form = `
   <!doctype html>
@@ -155,7 +129,33 @@ module.exports.resetForm = (req, res) => {
 
   </body>
 </html>`;
-  res.send(form);
+
+
+  jwt.verify(resetToken, privateKey, {
+    algorithms: ['HS256'],
+    expiresIn: '20m',
+  }, (err, decoded) => {
+    if (err && err.name === 'TokenExpiredError') {
+      const message = `
+    <!doctype html>
+      <html lang="en">
+      <head>
+      <meta charset="utf-8">
+
+      </head>
+      <body>
+    <h1>Password Reset Timeout</h1>
+    <p>Time required to perform this operation has elapsed and the link has expired.</p>
+    </body>
+    </html>
+    `;
+      return res.send('Link expired');
+    }
+    if (user.data && user.data.password !== decoded.passwordCrypt) {
+      return res.send('Invalid link');
+    }
+    return res.send(form);
+  });
 };
 
 // updates the password in the db
@@ -164,7 +164,7 @@ module.exports.updatePassword = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(422).send({ message: errors.array() });
   }
-  const { id, } = req.params;
+  const { id } = req.params;
   const { password } = req.body;
 
   const salt = bcrypt.genSaltSync(10);
@@ -178,7 +178,6 @@ module.exports.updatePassword = async (req, res) => {
       passwordCrypt,
       id,
     ],
-  );
-
-  res.send('Password Reset Successful');
+  ).then((result) => res.send('Password Reset Successful'))
+    .catch((err) => res.status(500).send('An Error occured while updating password, try again'));
 };
