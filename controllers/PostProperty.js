@@ -1,34 +1,23 @@
 const dotenv = require('dotenv');
 const { validationResult } = require('express-validator');
 const pool = require('../middleware/configs/elephantsql');
-const sessionValidator = require('../middleware/SessionValidator');
+const SessionValidator = require('../middleware/SessionValidator');
 
 dotenv.config();
 
 module.exports = async (req, res) => {
   // verify session
-  const tokenVerifier = sessionValidator(
+  const tokenVerifier = new SessionValidator(
     req.headers.authorization,
     process.env.RSA_PRIVATE_KEY,
     'user',
   );
 
-  if (tokenVerifier && tokenVerifier.expiration) {
-    return res.status(401).send({
-      remark: 'Expired',
-      message: tokenVerifier.expiration,
-    });
+  if (tokenVerifier.error) {
+    return tokenVerifier.errorResponse(res);
   }
 
-  if ((tokenVerifier && tokenVerifier.error)
-    || (tokenVerifier && !tokenVerifier.user)) {
-    return res.status(403).send({
-      remark: 'Error',
-      message: 'Invalid session access',
-    });
-  }
-
-  const { uid } = tokenVerifier.user;
+  const uid = tokenVerifier.user;
 
   // verify property details by user
   const errors = validationResult(req);

@@ -1,12 +1,15 @@
 const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 module.exports = async (mail, html, subject, text) => {
   const transport = nodemailer.createTransport({
     host: 'smtp.mailtrap.io',
     port: 2525,
     auth: {
-      user: '04c1f3a2415a49',
-      pass: 'b2db7ab932deb2',
+      user: process.env.MAILTRAP_SMTP_USERNAME,
+      pass: process.env.MAILTRAP_SMTP_PASSWORD,
     },
   });
 

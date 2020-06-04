@@ -42,7 +42,7 @@ app.use('/auth/properties', [PostProperty, PostImages]);
 app.use('/auth', RefreshToken);
 app.use('/auth/facebook', FacebookLogin);
 app.use('/auth/google', GoogleLogin);
-app.use('/', PasswordReset);
+app.use('/password', PasswordReset);
 
 server.use('/api', checkAPI('OK! Howmies'));
 server.use('/api/v0.0.1', [checkAPI('Welcome! Howmies'), app]);

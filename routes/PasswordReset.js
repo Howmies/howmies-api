@@ -7,8 +7,8 @@ const router = express.Router();
 
 // router.put('/resetpassword', passwordReset);
 
-router.post('/forgotPassword', email, forgotPassword);
-router.get('/forgotPassword/:id/:resetToken', url, resetForm);
-router.post('/resetPassword/:id/:resetToken', [url, password], updatePassword);
+router.post('/forgot_password/', email, forgotPassword);
+router.get('/forgot_password/:resetToken/', url, resetForm);
+router.post('/reset_password/:resetToken/', [url, password], updatePassword);
 
 module.exports = router;
