@@ -21,10 +21,6 @@ module.exports.password = [
 ];
 
 module.exports.url = [
-  param('id')
-    .notEmpty()
-    .withMessage('invalid url')
-    .escape(),
   param('resetToken')
     .notEmpty()
     .withMessage('invalid url')

@@ -9,19 +9,7 @@ const SessionValidator = require('../middleware/SessionValidator');
 
 dotenv.config();
 
-// gets password and sends mail to user
-module.exports.forgotPassword = async (req, res) => {
-  // validate user input
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send({ message: errors.array() });
-  }
-
-  // check that user exists
-
-  const { email } = req.body;
-
+const fetchUserFromDB = async (email, res) => {
   const user = await pool
     .query('SELECT * FROM users WHERE email=$1', [email])
     .then((result) => {
@@ -50,42 +38,46 @@ module.exports.forgotPassword = async (req, res) => {
     });
   }
 
-  // sign jwt
+  return user;
+};
 
-  const exp = 600;
+// gets password and sends mail to user
+module.exports.forgotPassword = async (req, res) => {
+  // validate user input
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({ message: errors.array() });
+  }
+
+  // check that user exists
+  const { email } = req.body;
+  const user = await fetchUserFromDB(email, res);
+
+  // sign jwt
+  const expiresIn = 600;
   const aud = 'user';
   const iss = 'Howmies Entreprise';
-  const alg = 'HS256';
+  const algorithm = 'HS256';
 
   const token = jwt.sign(
     {
-      exp, alg, iss, aud, uid: user.uid,
+      iss, aud, email, uid: user.uid,
     },
     user.passwordCrypt,
+    { expiresIn, algorithm },
   );
 
   // send mail
-
-  const html = `<a href="${process.env.ACCESS_CONTROL_ALLOW_ORIGIN}/api/v0.0.1/forgot_password/${token}">Reset password</a>`;
+  const html = `<a href="${process.env.ACCESS_CONTROL_ALLOW_ORIGIN}/api/v0.0.1/password/forgot_password/${token}">Reset password</a>`;
   const subject = 'Password Reset';
   const text = 'Reset your password';
 
-  const message = `
-    <!doctype html>
-      <html lang="en">
-      <head>
-      <meta charset="utf-8">
-
-      </head>
-      <body>
-    <h1>Check your email to reset your password</h1>
-    <p>Time required to perform this operation has elapsed and the link has expired.</p>
-    </body>
-    </html>`;
-
   mailer(email, html, subject, text)
-    .then(() => {
-      res.send(message);
+    .then((response) => {
+      res.send({
+        message: 'Mail sent successfully',
+        response,
+      });
     })
     .catch((err) => {
       res
@@ -101,39 +93,16 @@ module.exports.forgotPassword = async (req, res) => {
 module.exports.resetForm = async (req, res) => {
   // check that user exists and return the password hash for token secret
 
-  const { email } = req.body;
+  const { resetToken } = req.params;
+  const payload = jwt.decode(resetToken);
+  const { email } = payload;
 
-  const user = await pool
-    .query('SELECT * FROM users WHERE email=$1', [email])
-    .then((result) => {
-      if (result.rows && result.rows.length > 0) {
-        return { passwordCrypt: result.rows[0].password };
-      }
-    })
-    .catch(() => ({
-      error: () => res.status(500).send({
-        remark: 'Error',
-        message: 'Internal Server Error. Try again',
-      }),
-    }));
-
-  if (user && user.error) {
-    return user.error();
-  }
-
-  if (!user || !user.uid) {
-    return res.status(403).send({
-      remark: 'Error',
-      message: 'Incorrect email',
-    });
-  }
+  const user = await fetchUserFromDB(email, res);
 
   // verify password reset session
 
-  const { token } = req.params;
-
   const tokenVerifier = new SessionValidator(
-    token,
+    resetToken,
     user.passwordCrypt,
     'user',
   );
@@ -158,7 +127,7 @@ module.exports.resetForm = async (req, res) => {
     <body>
       <div class="container form-group" style='display: flex; flex-direction: column; justify-content: center; align-items: center; height: 80vh'>
         <h2>Reset Your Password</h2>
-        <form action="/api/v0.0.1/reset_password/${token}" method="POST" style='width: 70vw;' class="needs-validation"> 
+        <form action="/api/v0.0.1/password/reset_password/${resetToken}" method="POST" style='width: 70vw;' class="needs-validation"> 
           <div class="form-group">
             <label for="password">New Password</label>
             <input type="password" name="password" class="form-control" id="password" placeholder="Enter your new password..." pattern=[A-Za-z0-9]{8,24}> 
@@ -186,41 +155,20 @@ module.exports.updatePassword = async (req, res) => {
   // validate user request
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).send({ message: errors.array() });
+    return res.status(422).send('<p>Invalid Link</p>');
   }
 
   // check that user exists and return the password hash for token secret
 
-  const { email } = req.body;
+  const { resetToken } = req.params;
+  const payload = jwt.decode(resetToken);
+  const { email } = payload;
 
-  const user = await pool
-    .query('SELECT * FROM users WHERE email=$1', [email])
-    .then((result) => {
-      if (result.rows && result.rows.length > 0) {
-        return { passwordCrypt: result.rows[0].password };
-      }
-    })
-    .catch(() => ({
-      error: () => res.status(500).send({
-        remark: 'Error',
-        message: 'Internal Server Error. Try again',
-      }),
-    }));
-
-  if (user && user.error) {
-    return user.error();
-  }
-
-  if (!user || !user.uid) {
-    return res.status(403).send({
-      remark: 'Error',
-      message: 'Incorrect email',
-    });
-  }
+  const user = await fetchUserFromDB(email, res);
 
   // verify password reset session
   const tokenVerifier = new SessionValidator(
-    req.params.token,
+    resetToken,
     user.passwordCrypt,
     'user',
   );
