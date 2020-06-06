@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-module.exports = async (mail, html, subject, text) => {
+module.exports = async (mail, subject, text, html) => {
   const transport = nodemailer.createTransport({
     host: 'smtp.mailtrap.io',
     port: 2525,

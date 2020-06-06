@@ -35,5 +35,7 @@ module.exports = [
     .withMessage('Input a user password')
     .isLength({ max: 24, min: 8 })
     .withMessage('Password must be between 8 - 24 characters')
+    .custom((value, { req }) => value === req.body.confirmPassword)
+    .withMessage('Passwords do not match')
     .escape(),
 ];

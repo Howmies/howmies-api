@@ -3,43 +3,35 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const mailer = require('../middleware/emails');
+const mailer = require('../middleware/EmailHandler');
 const pool = require('../middleware/configs/elephantsql');
 const SessionValidator = require('../middleware/SessionValidator');
 
 dotenv.config();
 
-const fetchUserFromDB = async (email, res) => {
-  const user = await pool
-    .query('SELECT * FROM users WHERE email=$1', [email])
-    .then((result) => {
-      if (result.rows && result.rows.length > 0) {
-        return {
-          uid: result.rows[0].id,
-          passwordCrypt: result.rows[0].password,
-        };
-      }
-    })
-    .catch(() => ({
-      error: () => res.status(500).send({
+const fetchUserFromDB = async (email, res) => pool
+  .query('SELECT * FROM users WHERE email=$1', [email])
+  .then((result) => {
+    if (result.rows && result.rows.length === 1) {
+      return {
+        uid: result.rows[0].id,
+        passwordCrypt: result.rows[0].password,
+      };
+    }
+
+    return {
+      error: () => res.status(403).send({
         remark: 'Error',
-        message: 'Internal Server Error. Try again',
+        message: 'Incorrect email',
       }),
-    }));
-
-  if (user && user.error) {
-    return user.error();
-  }
-
-  if (!user || !user.uid) {
-    return res.status(403).send({
+    };
+  })
+  .catch(() => ({
+    error: () => res.status(500).send({
       remark: 'Error',
-      message: 'Incorrect email',
-    });
-  }
-
-  return user;
-};
+      message: 'Internal Server Error. Try again',
+    }),
+  }));
 
 // gets password and sends mail to user
 module.exports.forgotPassword = async (req, res) => {
@@ -53,6 +45,8 @@ module.exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   const user = await fetchUserFromDB(email, res);
 
+  if (user.error) return user.error();
+
   // sign jwt
   const expiresIn = 600;
   const aud = 'user';
@@ -61,7 +55,7 @@ module.exports.forgotPassword = async (req, res) => {
 
   const token = jwt.sign(
     {
-      iss, aud, email, uid: user.uid,
+      iss, aud, email,
     },
     user.passwordCrypt,
     { expiresIn, algorithm },
@@ -72,7 +66,7 @@ module.exports.forgotPassword = async (req, res) => {
   const subject = 'Password Reset';
   const text = 'Reset your password';
 
-  mailer(email, html, subject, text)
+  mailer(email, subject, text, html)
     .then((response) => {
       res.send({
         message: 'Mail sent successfully',
@@ -83,7 +77,7 @@ module.exports.forgotPassword = async (req, res) => {
       res
         .status(400)
         .send({
-          message: 'Something failed while sending mail!',
+          message: 'Internal server error. Please try again',
           error: err,
         });
     });
@@ -91,6 +85,12 @@ module.exports.forgotPassword = async (req, res) => {
 
 // returns a form for the user to update their password
 module.exports.resetForm = async (req, res) => {
+  // validate user request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send('<p>Invalid Link</p>');
+  }
+
   // check that user exists and return the password hash for token secret
 
   const { resetToken } = req.params;
@@ -98,6 +98,8 @@ module.exports.resetForm = async (req, res) => {
   const { email } = payload;
 
   const user = await fetchUserFromDB(email, res);
+
+  if (user.error) return user.error();
 
   // verify password reset session
 
@@ -127,14 +129,15 @@ module.exports.resetForm = async (req, res) => {
     <body>
       <div class="container form-group" style='display: flex; flex-direction: column; justify-content: center; align-items: center; height: 80vh'>
         <h2>Reset Your Password</h2>
-        <form action="/api/v0.0.1/password/reset_password/${resetToken}" method="POST" style='width: 70vw;' class="needs-validation"> 
+        <p>Take care and ensure that you DO NOT use a password that has been used before</p>
+        <form action="/api/v0.0.1/password/reset_password/${resetToken}" method="PUT" style='width: 70vw;' class="needs-validation"> 
           <div class="form-group">
             <label for="password">New Password</label>
             <input type="password" name="password" class="form-control" id="password" placeholder="Enter your new password..." pattern=[A-Za-z0-9]{8,24}> 
           </div>
           <div class="form-group">
             <label for="passwordconfirmation">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmpassword" placeholder="Confirm your new Password">
+            <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" placeholder="Confirm your new password">
           </div>
             <input type="submit" class="btn btn-primary" value="Reset Password"/> 
         </form>
@@ -154,9 +157,7 @@ module.exports.resetForm = async (req, res) => {
 module.exports.updatePassword = async (req, res) => {
   // validate user request
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send('<p>Invalid Link</p>');
-  }
+  if (!errors.isEmpty()) return res.status(422).send({ message: errors.array() });
 
   // check that user exists and return the password hash for token secret
 
@@ -166,7 +167,10 @@ module.exports.updatePassword = async (req, res) => {
 
   const user = await fetchUserFromDB(email, res);
 
+  if (user.error) return user.error();
+
   // verify password reset session
+
   const tokenVerifier = new SessionValidator(
     resetToken,
     user.passwordCrypt,
@@ -177,17 +181,34 @@ module.exports.updatePassword = async (req, res) => {
     return tokenVerifier.errorResponse(res);
   }
 
-  const uid = tokenVerifier.user;
+  // ensure new password and old password are not the same
 
   const { password } = req.body;
 
+  if (bcrypt.compareSync(password, user.passwordCrypt)) {
+    return res
+      .status(400)
+      .send('<p>For safety and security, use a different password</p>');
+  }
+
+  // update user password
+
   const salt = bcrypt.genSaltSync(10);
   const passwordCrypt = bcrypt.hashSync(password, salt);
+
   await pool
     .query(
-      'UPDATE users SET password=$1 WHERE id=$2',
-      [passwordCrypt, uid],
+      'UPDATE users SET password=$1 WHERE email=$2',
+      [passwordCrypt, email],
     )
-    .then(() => res.send('Password reset successful. You can now login'))
-    .catch(() => res.status(500).send('An Error occured while updating password, try again'));
+    .then(() => {
+      // send confirmation mail to user
+      const subject = 'Password Reset Success';
+      const html = `<p>A password reset has been initiated from your account. If you initiated this action, please ignore this message. Otherwise click <a href="${process.env.ACCESS_CONTROL_ALLOW_ORIGIN}/api/v0.0.1/password/forgot_password/">here</a></p>`;
+      const text = 'Your password has been reset';
+
+      mailer(email, subject, text, html).catch(() => null);
+      return res.send('Password reset successful. You can now login');
+    })
+    .catch(() => res.status(500).send('Internal server error. Try again'));
 };
