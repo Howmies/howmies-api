@@ -14,6 +14,7 @@ const fetchUserFromDB = async (email, res) => pool
   .then((result) => {
     if (result.rows && result.rows.length === 1) {
       return {
+        firstName: result.rows[0].first_name,
         uid: result.rows[0].id,
         passwordCrypt: result.rows[0].password,
       };
@@ -62,7 +63,16 @@ module.exports.forgotPassword = async (req, res) => {
   );
 
   // send mail
-  const html = `<a href="${process.env.ACCESS_CONTROL_ALLOW_ORIGIN}/api/v0.0.1/password/forgot_password/${token}">Reset password</a>`;
+  const html = `
+  <div style='display: flex; flex-direction: column; align-items: center'>
+  <div>
+  <p>Dear ${user.firstName},</p>
+  <p>We received a request to reset your password.</p>
+  <p>Follow this link to reset your password ➡ <a href="${process.env.ACCESS_CONTROL_ALLOW_ORIGIN}/api/v0.0.1/password/forgot_password/${token}">Reset password Link</a> </p>
+  <p>If you didn’t ask to reset your password, you can ignore this email.</p>
+  <p>Thanks <br/> Howmies Team</p>
+  </div>
+  </div>`;
   const subject = 'Password Reset';
   const text = 'Reset your password';
 
@@ -130,10 +140,10 @@ module.exports.resetForm = async (req, res) => {
       <div class="container form-group" style='display: flex; flex-direction: column; justify-content: center; align-items: center; height: 80vh'>
         <h2>Reset Your Password</h2>
         <p>Take care and ensure that you DO NOT use a password that has been used before</p>
-        <form action="/api/v0.0.1/password/reset_password/${resetToken}" method="PUT" style='width: 70vw;' class="needs-validation"> 
+        <form action="/api/v0.0.1/password/reset_password/${resetToken}" method="POST" style='width: 70vw;' class="needs-validation"> 
           <div class="form-group">
             <label for="password">New Password</label>
-            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your new password..." pattern=[A-Za-z0-9]{8,24}> 
+            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your new password..." pattern=[A-Za-z0-9\\W]{8,24}> 
           </div>
           <div class="form-group">
             <label for="passwordconfirmation">Confirm New Password</label>
@@ -204,11 +214,11 @@ module.exports.updatePassword = async (req, res) => {
     .then(() => {
       // send confirmation mail to user
       const subject = 'Password Reset Success';
-      const html = `<p>A password reset has been initiated from your account. If you initiated this action, please ignore this message. Otherwise click <a href="${process.env.ACCESS_CONTROL_ALLOW_ORIGIN}/api/v0.0.1/password/forgot_password/">here</a></p>`;
+      const html = `<p>Dear ${user.firstName}, <br/> You have successfully changed your password. <br/><br/>Thanks for using our service. <br/> Howmies &copy; 2020</p>`;
       const text = 'Your password has been reset';
 
       mailer(email, subject, text, html).catch(() => null);
-      return res.send('Password reset successful. You can now login');
+      return res.send('<p style=\'font-size: 20px;\'>Password reset successful. You can now login</p>');
     })
     .catch(() => res.status(500).send('Internal server error. Try again'));
 };

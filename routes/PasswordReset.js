@@ -4,8 +4,9 @@ const { email, password, url } = require('../middleware/request_validator/Passwo
 
 const router = express.Router();
 
-router.post('/forgot_password/', email, forgotPassword);
-router.get('/forgot_password/:resetToken/', url, resetForm);
-router.put('/reset_password/:resetToken/', [url, password], updatePassword);
+router
+  .post('/forgot_password/', email, forgotPassword)
+  .get('/forgot_password/:resetToken/', url, resetForm)
+  .post('/reset_password/:resetToken/', [url, password], updatePassword);
 
 module.exports = router;

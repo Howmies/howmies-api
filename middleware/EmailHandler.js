@@ -14,7 +14,7 @@ module.exports = async (mail, subject, text, html) => {
   });
 
   const mailOptions = {
-    from: 'noreply@howmiesenterprises.com',
+    from: '"Howmies Enterprises" <noreply@howmiesenterprises.com>',
     to: mail,
     subject,
     text,
