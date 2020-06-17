@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 const { validationResult } = require('express-validator');
-const pool = require('../middleware/configs/elephantsql');
-const SessionValidator = require('../middleware/SessionValidator');
+const pool = require('../configs/elephantsql');
+const SessionValidator = require('../utils/SessionValidator');
 
 dotenv.config();
 

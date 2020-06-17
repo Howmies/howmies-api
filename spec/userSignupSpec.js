@@ -2,7 +2,7 @@
 
 const dotenv = require('dotenv');
 const request = require('request');
-const pool = require('../middleware/configs/elephantsql');
+const pool = require('../configs/elephantsql');
 require('../server');
 
 dotenv.config();

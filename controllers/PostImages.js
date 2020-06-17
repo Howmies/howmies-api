@@ -1,8 +1,8 @@
 const dotenv = require('dotenv');
 const { dataURI } = require('../middleware/file_upload/multerConfig');
-const pool = require('../middleware/configs/elephantsql');
+const pool = require('../configs/elephantsql');
 const { cloudinaryConfig, uploader } = require('../middleware/file_upload/cloudinaryConfig');
-const sessionValidator = require('../middleware/SessionValidator');
+const sessionValidator = require('../utils/SessionValidator');
 
 dotenv.config();
 

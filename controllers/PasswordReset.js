@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const mailer = require('../middleware/EmailHandler');
-const pool = require('../middleware/configs/elephantsql');
-const SessionValidator = require('../middleware/SessionValidator');
+const mailer = require('../utils/EmailHandler');
+const pool = require('../configs/elephantsql');
+const SessionValidator = require('../utils/SessionValidator');
 
 dotenv.config();
 

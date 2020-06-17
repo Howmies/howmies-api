@@ -2,9 +2,9 @@ const passport = require('passport');
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const strategy = require('passport-facebook');
-const pool = require('../middleware/configs/elephantsql');
-const facebookLogin = require('../middleware/configs/facebookConfig');
-const LoginProcessor = require('../middleware/LoginHandler');
+const pool = require('../configs/elephantsql');
+const facebookLogin = require('../configs/facebookConfig');
+const LoginProcessor = require('../utils/LoginHandler');
 
 const FacebookStrategy = strategy.Strategy;
 

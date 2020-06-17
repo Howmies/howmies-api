@@ -2,9 +2,9 @@ const passport = require('passport');
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const strategy = require('passport-google-oauth20');
-const pool = require('../middleware/configs/elephantsql');
-const googleLogin = require('../middleware/configs/googleConfig');
-const LoginProcessor = require('../middleware/LoginHandler');
+const pool = require('../configs/elephantsql');
+const googleLogin = require('../configs/googleConfig');
+const LoginProcessor = require('../utils/LoginHandler');
 
 const GoogleStrategy = strategy.Strategy;
 

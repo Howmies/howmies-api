@@ -1,4 +1,4 @@
-const pool = require('./configs/elephantsql');
+const pool = require('../configs/elephantsql');
 
 module.exports = class {
   /**
