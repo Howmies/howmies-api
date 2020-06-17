@@ -41,6 +41,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testUserEmail@howmies.com',
       phone: '+2349012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -82,6 +83,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testUserEmail@howmies.com',
       phone: '+2349012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -123,6 +125,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testUserEmail@howmies.com',
       phone: '+2349012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -165,6 +168,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testUserEmail@howmies.com',
       phone: '+2349012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -207,6 +211,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testuserEmail@howmies',
       phone: '+2349012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -290,6 +295,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testUserEmail@howmies.com',
       phone: '190123456781',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -332,6 +338,7 @@ describe('POST /auth/users/signup', () => {
       email: 'johndoe@howmies.com',
       phone: '+2348012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {
@@ -372,6 +379,7 @@ describe('POST /auth/users/signup', () => {
       email: 'testUserEmail@howmies.com',
       phone: '+2348012345678',
       password: 'testPassword',
+      confirmPassword: 'testPassword',
     };
 
     const options = {

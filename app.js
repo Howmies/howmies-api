@@ -14,6 +14,7 @@ const UserSignup = require('./routes/UserSignup');
 const UserLogin = require('./routes/UserLogin');
 const FacebookLogin = require('./routes/FacebookLogin');
 const GoogleLogin = require('./routes/GoogleLogin');
+const PasswordReset = require('./routes/PasswordReset');
 const RefreshToken = require('./routes/RefreshToken');
 const UserSignout = require('./routes/UserSignout');
 const PostProperty = require('./routes/PostProperty');
@@ -43,6 +44,7 @@ const checkAPI = (resMessage = 'OK!') => express.Router().get('/', (req, res) =>
 app.use('/auth/users', [UserSignup, UserLogin, UserSignout]);
 app.use('/auth/facebook', FacebookLogin);
 app.use('/auth/google', GoogleLogin);
+app.use('/password', PasswordReset);
 app.use('/auth', RefreshToken);
 app.use('/auth/properties', [PostProperty, PostImages]);
 app.use('/properties', PropertySearch);
