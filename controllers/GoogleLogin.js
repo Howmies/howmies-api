@@ -15,12 +15,10 @@ const salt = bcrypt.genSaltSync(10);
 
 const cryptedGoogleID = (googleID) => bcrypt.hash(googleID, salt);
 
-const loginProcessor = new LoginProcessor();
-
 const registerGoogleUser = async (firstName, lastName, email, googleID, done) => {
   await pool.query(
-    `INSERT INTO users(first_name, last_name, email, phone, password, register_date)
-    VALUES($1, $2, $3, $4, $5, $6)
+    `INSERT INTO users(first_name, last_name, email, password, register_date)
+    VALUES($1, $2, $3, $4, $5)
     RETURNING *`,
     [
       firstName,
@@ -29,17 +27,20 @@ const registerGoogleUser = async (firstName, lastName, email, googleID, done) =>
       cryptedGoogleID(googleID),
       Date.now(),
     ],
-    async (err, result) => {
+    (err, result) => {
       if (err || (result.rows && result.rows.length === 0)) {
-        return done(err);
+        return done(JSON.stringify({
+          remark: 'Error',
+          message: 'Internal server error',
+        }));
       }
 
-      loginProcessor.done = done;
-      loginProcessor.uid = result.rows[0].id;
-      loginProcessor.confirmedLogin = await loginProcessor.loggedUser;
-      loginProcessor.username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
-      loginProcessor.telephone = '';
-      loginProcessor.email = result.rows[0].email;
+      const uid = result.rows[0].id;
+      const username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
+      const telephone = '';
+      const userEmail = result.rows[0].email;
+
+      const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
 
       const user = { loginProcessor };
 
@@ -56,9 +57,12 @@ const checkRegisteredUser = async (email, done, firstName, lastName, googleID) =
   await pool.query(
     'SELECT * FROM users WHERE email=$1',
     [email],
-    async (err, result) => {
+    (err, result) => {
       if (err) {
-        return done(err);
+        return done(JSON.stringify({
+          remark: 'Error',
+          message: 'Internal server error',
+        }));
       }
 
       if (result.rows && result.rows.length === 0) {
@@ -66,12 +70,12 @@ const checkRegisteredUser = async (email, done, firstName, lastName, googleID) =
       }
 
       if (result.rows && result.rows.length === 1) {
-        loginProcessor.done = done;
-        loginProcessor.uid = result.rows[0].id;
-        loginProcessor.confirmedLogin = await loginProcessor.loggedUser;
-        loginProcessor.username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
-        loginProcessor.telephone = '';
-        loginProcessor.email = result.rows[0].email;
+        const uid = result.rows[0].id;
+        const username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
+        const telephone = '';
+        const userEmail = result.rows[0].email;
+
+        const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
 
         const user = { loginProcessor };
 

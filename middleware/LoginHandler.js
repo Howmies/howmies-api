@@ -1,7 +1,7 @@
 const passport = require('passport');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const pool = require('./configs/elephantsql');
+// const pool = require('../middleware/configs/elephantsql');
 
 dotenv.config();
 
@@ -18,32 +18,45 @@ passport.deserializeUser((obj, done) => {
 // hash user password or external passport id
 
 module.exports = class {
-  constructor() {
-    // user token options
+  /**
+   * Successfully log user in after all checks and other requirements have been fulfilled.
+   * @param {Number} uid The user id.
+   * @param {String} username The first name and last name of the user.
+   * @param {String} telephone The telephone number of the user.
+   * @param {String} email The email address of the user.
+   */
+  constructor(uid, username, telephone, email) {
+    // user access token options
 
-    const { uid } = this;
-
-    const expiresIn = 1500;
-    const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
-    const aud = 'in-app Facebook user';
+    const expiresIn = 900;
+    const aud = 'user';
     const iss = 'Howmies Entreprise';
-    const data = 'refresh in-app Facebook user';
     const algorithm = 'HS256';
 
-    const tokenKeys = {
+    const tokenSecret = {
       keyPrivate: process.env.RSA_PRIVATE_KEY,
       keyPublic: process.env.RSA_PUBLIC_KEY,
     };
 
     const accessToken = jwt.sign(
       { iss, aud, uid },
-      tokenKeys.keyPrivate,
+      tokenSecret.keyPrivate,
       { expiresIn, algorithm },
     );
 
+    // user refresh token options
+
+    const exp = Math.floor(Date.now() / 1000) + (3600 * 24 * 30);
+
+    const data = {
+      username,
+      telephone,
+      email,
+    };
+
     const refreshToken = jwt.sign(
-      { exp, data },
-      tokenKeys.keyPrivate,
+      { exp, uid, data },
+      tokenSecret.keyPrivate,
       { algorithm, issuer: iss, audience: aud },
     );
 
@@ -52,51 +65,33 @@ module.exports = class {
     const cookieOptions = {
       maxAge: 3600000 * 24 * 30,
       path: '/api/v0.0.1/auth/refresh_token',
-      domain: `.${process.env.DOMAIN_NAME}`,
-      httpOnly: true,
+      domain: process.env.DOMAIN_NAME,
+      httpOnly: false,
+      sameSite: 'none',
+      // secure: true,
     };
 
-    if (process.env.DOMAIN_NAME !== 'howmies.com') {
-      delete cookieOptions.domain;
-    }
-
-    // log user in
-
-    const loggedUser = pool.query(
-      'INSERT INTO logged_users(user_id, refresh_token) VALUES($1, $2)',
-      [uid, refreshToken],
-    )
-      .then(() => null)
-      .catch((err) => {
-        if (!err) {
-          return { error: 'Internal Server Error' };
-        }
-      });
-
-    this.loggedUser = loggedUser;
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.cookieOptions = cookieOptions;
     this.expiresIn = expiresIn;
     this.exp = exp;
+    this.uid = uid;
+
+    this.username = username;
+    this.telephone = telephone;
+    this.email = email;
   }
 
+  /**
+   * Successfully log user in after all checks and other requirements have been fulfilled.
+   * @param {Response} res Express.js HTTP response.
+   * @returns {Response} Express.js HTTP response.
+   */
   successResponse(res) {
-    const { confirmedLogin } = this;
-
-    if (confirmedLogin && confirmedLogin.error) {
-      if (this.done) {
-        return this.done(confirmedLogin.error);
-      }
-      return res.status(406).send({
-        remark: 'Error',
-        message: confirmedLogin.error,
-      });
-    }
-
     const {
       accessToken, refreshToken, cookieOptions, uid,
-      username, telephone, email, expiresIn, exp,
+      expiresIn, username, telephone, email,
     } = this;
 
     return res
@@ -110,8 +105,7 @@ module.exports = class {
           username,
           telephone,
           email,
-          expiresIn: `${expiresIn}s`,
-          refreshIn: `${exp}s`,
+          expiresIn: expiresIn * 1000,
         },
       });
   }
