@@ -2,46 +2,71 @@
 
 const dotenv = require('dotenv');
 const request = require('request');
-require('../server');
+const app = require('../app');
 
 dotenv.config();
 
-const version = 'v0.0.1';
+const normalizePort = (val) => {
+  const port = parseInt(val, 10);
 
-describe('Server', () => {
-  afterAll(() => {
-    console.log('\x1b[42m\x1b[30m', 'Finished API version availability tests\x1b[0m\n');
+  if (isNaN(port)) {
+    return val;
+  }
+  if (port >= 0) {
+    return port;
+  }
+  return false;
+};
+
+const port = normalizePort(process.env.PORT);
+
+const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}`;
+
+let server;
+
+describe('GET /api/v0.0.1', () => {
+  beforeAll((done) => {
+    server = app
+      .set('port', port)
+      .listen(port, () => done());
   });
 
-  describe('GET /', () => {
+  afterAll((done) => {
+    server.close(() => {
+      done();
+      console.log(
+        '\x1b[42m\x1b[30m', 'Finished API version tests\x1b[0m\n',
+      );
+    });
+  });
+
+  describe('development root url', () => {
     const result = {};
-    const uri = `http://localhost:${process.env.PORT}/api/${version}/`;
+    const options = {
+      method: 'GET',
+      json: true,
+    };
 
-    describe('development root url', () => {
-      const options = {
-        method: 'GET',
-        json: true,
-      };
-
-      beforeEach((done) => {
-        request(uri, options, (error, response, body) => {
-          result.status = response.statusCode;
-          result.message = body.message;
-          done();
-        });
-      });
-      afterEach((done) => {
-        console.log('Test complete for API version availability');
+    beforeEach((done) => {
+      request(uri, options, (error, response, body) => {
+        result.status = response.statusCode;
+        result.message = body.message;
         done();
       });
-      it('responds with Status 200', () => {
-        const expected = 200;
-        expect(result.status).toBe(expected);
-      });
-      it('responds with Welcome message', () => {
-        const expected = 'Welcome! Howmies';
-        expect(result.message).toBe(expected);
-      });
+    });
+
+    afterEach(() => {
+      console.log('Test complete for API versioning');
+    });
+
+    it('responds with Status 200', () => {
+      const expected = 200;
+      expect(result.status).toBe(expected);
+    });
+
+    it('responds with Welcome message', () => {
+      const expected = 'Welcome! Howmies';
+      expect(result.message).toBe(expected);
     });
   });
 });

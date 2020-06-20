@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const LoginProcessor = require('../middleware/LoginHandler');
+const LoginProcessor = require('../utils/login-handler');
 
 dotenv.config();
 

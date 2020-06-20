@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const pool = require('../configs/elephantsql');
-const LoginProcessor = require('../utils/LoginHandler');
+const LoginProcessor = require('../utils/login-handler');
 
 dotenv.config();
 

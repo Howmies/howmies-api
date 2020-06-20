@@ -50,8 +50,8 @@ IF NOT EXISTS status_periods
     "desc" text COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
-    CONSTRAINT status_period_pkey PRIMARY KEY ("id"),
-    CONSTRAINT status_periods_period_name_key UNIQUE (name)
+    CONSTRAINT status_periods_pkey PRIMARY KEY ("id"),
+    CONSTRAINT status_periods_name_key UNIQUE (name)
 );
 
 CREATE SEQUENCE status_types_id_seq;
@@ -63,8 +63,8 @@ IF NOT EXISTS status_types
     "desc" text COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
-    CONSTRAINT status_type_pkey PRIMARY KEY ("id"),
-    CONSTRAINT status_types_status_name_key UNIQUE (name)
+    CONSTRAINT status_types_pkey PRIMARY KEY ("id"),
+    CONSTRAINT status_types_name_key UNIQUE (name)
 );
 
 CREATE SEQUENCE properties_id_seq;
@@ -125,12 +125,12 @@ CREATE TABLE
 IF NOT EXISTS features
 (
     "id" integer NOT NULL DEFAULT nextval('features_id_seq'::regclass),
-    feature_name character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(32) COLLATE pg_catalog."default" NOT NULL,
     "desc" text COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT features_pkey PRIMARY KEY ("id"),
-    CONSTRAINT features_feature_name_key UNIQUE (feature_name)
+    CONSTRAINT features_name_key UNIQUE (name)
 );
 
 CREATE SEQUENCE properties_and_features_id_seq;

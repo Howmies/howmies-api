@@ -1,5 +1,7 @@
 const { validationResult } = require('express-validator');
-const BasicPropertySearch = require('../middleware/PropertySearch');
+const GetProperty = require('../models/properties-get-model');
+const errorHandler = require('../utils/error-handler');
+const successResponseHandler = require('../utils/success-response-handler');
 
 module.exports = async (req, response) => {
   const errors = validationResult(req);
@@ -11,17 +13,47 @@ module.exports = async (req, response) => {
     location, type,
   } = req.query;
 
-  const basicPropertySearch = new BasicPropertySearch(response, pagination);
+  const propertySearch = new GetProperty(pagination);
 
   if (location && type) {
-    return basicPropertySearch.byLocationAndPropertyType(location, type);
+    try {
+      const { rowCount, rows } = await propertySearch.getByLocationAndPropertyType(location, type);
+      return successResponseHandler(
+        response,
+        rowCount === 0 ? 204 : 200,
+        rowCount === 0 ? 'No property available' : 'Property available',
+        rows,
+      );
+    } catch (error) {
+      return errorHandler(req, response);
+    }
   }
 
   if (location && !type) {
-    return basicPropertySearch.byLocation(location);
+    try {
+      const { rowCount, rows } = await propertySearch.getByLocation(location, type);
+      return successResponseHandler(
+        response,
+        rowCount === 0 ? 204 : 200,
+        rowCount === 0 ? 'No property available' : 'Property available',
+        rows,
+      );
+    } catch (error) {
+      return errorHandler(req, response);
+    }
   }
 
   if (type) {
-    return basicPropertySearch.byPropertyType(type);
+    try {
+      const { rowCount, rows } = await propertySearch.getByPropertyType(location, type);
+      return successResponseHandler(
+        response,
+        rowCount === 0 ? 204 : 200,
+        rowCount === 0 ? 'No property available' : 'Property available',
+        rows,
+      );
+    } catch (error) {
+      return errorHandler(req, response);
+    }
   }
 };

@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const strategy = require('passport-google-oauth20');
 const pool = require('../configs/elephantsql');
 const googleLogin = require('../configs/googleConfig');
-const LoginProcessor = require('../utils/LoginHandler');
+const LoginProcessor = require('../utils/login-handler');
 
 const GoogleStrategy = strategy.Strategy;
 

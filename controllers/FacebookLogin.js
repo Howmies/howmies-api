@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const strategy = require('passport-facebook');
 const pool = require('../configs/elephantsql');
 const facebookLogin = require('../configs/facebookConfig');
-const LoginProcessor = require('../utils/LoginHandler');
+const LoginProcessor = require('../utils/login-handler');
 
 const FacebookStrategy = strategy.Strategy;
 

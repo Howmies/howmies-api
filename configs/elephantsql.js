@@ -13,7 +13,7 @@ switch (process.env.NODE_ENV) {
     conObj.password = process.env.DEV_DB_PASSWORD;
     conObj.port = process.env.DEV_DB_PORT;
     break;
-  case 'testing':
+  case 'test':
     conObj.user = process.env.TEST_DB_USER;
     conObj.host = process.env.TEST_DB_HOST;
     conObj.database = process.env.TEST_DB_DATABASE;
