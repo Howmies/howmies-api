@@ -1,7 +1,9 @@
 const dotenv = require('dotenv');
 const { validationResult } = require('express-validator');
 const pool = require('../configs/elephantsql');
+const PropertiesModel = require('../models/properties-model');
 const SessionValidator = require('../utils/SessionValidator');
+const errorHandler = require('../utils/error-handler');
 
 dotenv.config();
 
@@ -31,33 +33,19 @@ module.exports = async (req, res) => {
     type, state, lga, address, status, price, period, description, phone, email, features,
   } = req.body;
 
-  // save other property details to properties table
-  const pID = await pool.query(
-    `INSERT INTO properties(
-      owner_id, property_type, state, lga, address, status_type, price,
-      period, property_desc, property_phone, property_email, post_date
-    )
-    SELECT $1, property_types.id, $3, $4, $5, status_types.id, $7, status_periods.id, $9, $10, $11, $12
-      FROM property_types, status_types, status_periods
-      WHERE property_types.property_name=$2 AND status_types.status_name=$6 AND status_periods.period_name=$8
-    RETURNING property_id`,
-    [
-      uid,
-      type,
-      state,
-      lga,
-      address,
-      status,
-      price,
-      period,
-      description,
-      phone,
-      email,
-      Date.now(),
-    ],
-  )
-    .then((propertyResult) => propertyResult.rows[0].property_id)
-    .catch(() => null);
+  // save property details to properties table except features
+  const propertiesModel = new PropertiesModel(uid);
+
+  let pID;
+
+  try {
+    const newProperty = await propertiesModel.create(
+      type, state, lga, address, status, price, period, description, phone, email,
+    );
+    pID = newProperty['p.id'];
+  } catch (error) {
+    return errorHandler(req, res);
+  }
 
   // verify property type
   if (!pID) {

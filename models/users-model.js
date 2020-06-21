@@ -59,15 +59,13 @@ module.exports = class {
 
   static async update(id, newUserData) {
     const setUpdate = () => {
-      let text;
+      let text = '';
 
-      Object.keys(newUserData).forEach((k, i) => {
+      Object.keys(newUserData).forEach((k, i, arr) => {
         if (newUserData[k] != null) {
-          text = '';
-          if (i === Object.keys(newUserData).length - 1) {
-            text += `${k}='${newUserData[k]}'`;
-          } else {
-            text += `${k}='${newUserData[k]}', `;
+          text += `${k}='${newUserData[k]}'`;
+          if (i !== arr.length - 1) {
+            text += ', ';
           }
         }
       });

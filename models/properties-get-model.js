@@ -2,6 +2,33 @@ const pool = require('../configs/elephantsql');
 
 module.exports = class {
   /**
+   * Get a housing property by its ID.
+   * @param {Number} id The property ID.
+   * @returns
+   */
+
+  static async GetById(id) {
+    const queryString = `SELECT p.id, p.address, p.lga, p.state, p.price, per.name, s.name, 
+      STRING_AGG(DISTINCT f.name, E', ' ORDER BY f.name ASC) AS all_features,
+      p.desc, p.owner_id, p.date_created, p.phone, p.email,
+      ARRAY_AGG(DISTINCT img.image_url) AS all_images
+      FROM properties AS p, status_types as s, status_periods as per, images as img
+      LEFT JOIN properties_and_features as pf ON p.id=pf.property_id
+      LEFT JOIN features as f ON pf.feature_id=f.id
+      WHERE p.id=$1, p.status_type=s.id, p.period=per.id, img.property_id=p.id
+      GROUP BY p.id, per.name, s.name;`;
+
+    const queryValues = [id];
+
+    try {
+      const { rowCount, rows } = await pool.query(queryString, queryValues);
+      return Promise.resolve({ rowCount, row: rows[0] });
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  /**
    * To be used for requests that have no feature field.
    * @param {Response} response
    * @param {Number} pagination The zero-index page number for the requested data.
@@ -28,7 +55,7 @@ module.exports = class {
       INNER JOIN status_types as s ON p.status_type=s.id
       INNER JOIN status_periods as per ON p.period=per.id
       INNER JOIN images as img ON img.property_id=p.id
-      LEFT JOIN properties_features as pf ON p.id=pf.property_id
+      LEFT JOIN properties_and_features as pf ON p.id=pf.property_id
       LEFT JOIN features as f ON pf.feature_id=f.id
       WHERE (p.state=$1 OR p.lga=$1) AND p.period=per.id
       GROUP BY p.id, per.name, s.name ORDER BY p.date_created DESC OFFSET $2 LIMIT 10;`;
@@ -57,7 +84,7 @@ module.exports = class {
       INNER JOIN status_types as s ON p.status_type=s.id
       INNER JOIN status_periods as per ON p.period=per.id
       INNER JOIN images as img ON img.property_id=p.id
-      LEFT JOIN properties_features as pf ON p.id=pf.property_id
+      LEFT JOIN properties_and_features as pf ON p.id=pf.property_id
       LEFT JOIN features as f ON pf.feature_id=f.id
       WHERE p.period=per.id
       AND p.property_type IN (SELECT t.id FROM property_types as t WHERE t.name=$1)
@@ -88,7 +115,7 @@ module.exports = class {
       INNER JOIN status_types as s ON p.status_type=s.id
       INNER JOIN status_periods as per ON p.period=per.id
       INNER JOIN images as img ON img.property_id=p.id
-      LEFT JOIN properties_features as pf ON p.id=pf.property_id
+      LEFT JOIN properties_and_features as pf ON p.id=pf.property_id
       LEFT JOIN features as f ON pf.feature_id=f.id
       WHERE (p.state=$1 OR p.lga=$1) AND p.period=per.id
       AND p.property_type IN (SELECT t.id FROM property_types as t WHERE t.name=$2)
