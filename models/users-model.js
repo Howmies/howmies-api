@@ -2,18 +2,40 @@ const pool = require('../configs/elephantsql');
 
 module.exports = class {
   /**
-   * @description Select a user either by email or phone number
+   * @description Get a user by email address
+   * @param {String} email user's normalized email address
+   * @returns {Promise} account associated with the email address
+   */
+
+  static async getByEmail(email) {
+    const queryString = `SELECT * FROM users
+    WHERE email=$1;`;
+    const queryValues = [email];
+    try {
+      const { rows } = await pool.query(queryString, queryValues);
+      return Promise.resolve(rows[0]);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  /**
+   * @description Check that a user exists either by email address or phone number
    * @param {String} email user's normalized email address
    * @param {String} phone user's international standard phone number
-   * @returns {Promise} email and phone number on success
+   * @returns {Promise}  number of accounts associated with both the email and the phone number
    */
 
   static async getByEmailOrPhone(email, phone) {
-    const queryString = 'SELECT email, phone FROM users WHERE email=$1 OR phone=$2;';
+    const queryString = `SELECT email, phone FROM users
+    WHERE
+    (email=$1 AND phone IS NOT NULL)
+    OR
+    (phone=$2 AND email IS NOT NULL);`;
     const queryValues = [email, phone];
     try {
-      const user = await pool.query(queryString, queryValues);
-      return Promise.resolve(user.rowCount);
+      const { rowCount } = await pool.query(queryString, queryValues);
+      return Promise.resolve(rowCount);
     } catch (err) {
       return Promise.reject(err);
     }
@@ -34,13 +56,13 @@ module.exports = class {
   ) {
     const queryString = `INSERT INTO users(email, phone, password, first_name, last_name)
     VALUES($1, $2, $3, $4, $5)
-    RETURNING email, phone, first_name, last_name;`;
+    RETURNING id, email, phone, first_name, last_name;`;
 
     const queryValues = [email, phone, password, firstName, lastName];
 
     try {
-      const user = await pool.query(queryString, queryValues);
-      return Promise.resolve(user.rows);
+      const { rows } = await pool.query(queryString, queryValues);
+      return Promise.resolve(rows[0]);
     } catch (err) {
       return Promise.reject(err);
     }
@@ -75,14 +97,14 @@ module.exports = class {
 
     const queryString = `UPDATE users
     SET ${setUpdate()}
-    WHERE id=$1
+    WHERE "id"=$1
     RETURNING email, phone, first_name, last_name;`;
 
     const queryValues = [id];
 
     try {
-      const user = await pool.query(queryString, queryValues);
-      return Promise.resolve(user);
+      const { rows } = await pool.query(queryString, queryValues);
+      return Promise.resolve(rows[0]);
     } catch (err) {
       return Promise.reject(err);
     }
@@ -95,7 +117,7 @@ module.exports = class {
    */
 
   static async deleteById(id) {
-    const queryString = 'DELETE FROM users WHERE id=$1;';
+    const queryString = 'DELETE FROM users WHERE "id"=$1;';
     const queryValues = [id];
     try {
       await pool.query(queryString, queryValues);

@@ -88,14 +88,14 @@ module.exports = class {
    * @param {Response} res Express.js HTTP response.
    * @returns {Response} Express.js HTTP response.
    */
-  successResponse(res) {
+  successResponse(res, status = 200) {
     const {
       accessToken, refreshToken, cookieOptions, uid,
       expiresIn, username, telephone, email,
     } = this;
 
     return res
-      .status(200)
+      .status(status)
       .cookie('HURT', refreshToken, cookieOptions)
       .set('Authorization', accessToken)
       .send({

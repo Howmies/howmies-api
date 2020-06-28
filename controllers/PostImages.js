@@ -1,8 +1,10 @@
 const dotenv = require('dotenv');
-const { dataURI } = require('../middleware/file_upload/multerConfig');
-const pool = require('../configs/elephantsql');
+const { validationResult } = require('express-validator');
+const { dataUri } = require('../middleware/file_upload/multerConfig');
 const { cloudinaryConfig, uploader } = require('../middleware/file_upload/cloudinaryConfig');
-const sessionValidator = require('../utils/SessionValidator');
+const ImagesModel = require('../models/images-model');
+const sessionValidator = require('../utils/session-validator');
+const errorHandler = require('../utils/error-handler');
 
 dotenv.config();
 
@@ -10,63 +12,60 @@ cloudinaryConfig();
 
 module.exports = async (req, res) => {
   // verify session
-  const tokenVerifier = sessionValidator(
-    req.headers.Authorization,
-    process.env.RSA_PRIVATE_KEY,
-    'user',
-  );
 
-  if (tokenVerifier && tokenVerifier.expiration) {
-    return res.status(401).send({
-      remark: 'Expired',
-      message: tokenVerifier.expiration,
-    });
-  }
-
-  if ((tokenVerifier && tokenVerifier.error)
-    || (tokenVerifier && !tokenVerifier.user)) {
-    return res.status(403).send({
-      remark: 'Error',
-      message: 'Invalid session access',
-    });
+  try {
+    await sessionValidator(
+      req.headers.authorization,
+      process.env.RSA_PRIVATE_KEY,
+      'user',
+    );
+  } catch (err) {
+    errorHandler(req, res, 403);
   }
 
   // verify images
   if (req.imagesError) {
-    return res.status(403).send({
-      remark: 'Error',
-      message: 'Ensure your images are jpg, jpeg or png',
-    });
+    return errorHandler(req, res, 400, 'Ensure your images are jpg, jpeg or png');
   }
 
-  // verify database image count
-  const pID = req.params.pid;
+  // verify property ID in URL
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).send({ message: errors.array() });
+  }
+
+  // verify at least one accepted file
+
+  const pID = req.params.property_id;
   const images = req.files;
 
-  const imageCount = await pool.query(
-    'SELECT COUNT(property_id) FROM images WHERE property_id=$1',
-    [parseInt(pID, 10)],
-  )
-    .then((result) => result.rows[0].count)
-    .catch(() => null);
+  if (!images || (Array.isArray(images) && images.length < 1)) {
+    return errorHandler(req, res, 400, 'Ensure your images are jpg, jpeg or png');
+  }
 
-  if (!imageCount) {
-    return res.status(500).send({
-      remark: 'Error',
-      message: 'Internal server error',
-    });
+  // verify image count for the property in database
+
+  const imageModel = new ImagesModel(pID);
+
+  let imageCount;
+
+  try {
+    imageCount = await imageModel.getImageCount();
+  } catch (err) {
+    return errorHandler(req, res);
   }
 
   if (imageCount + images.length > 10) {
-    return res.status(400).send({
-      remark: 'Warning',
-      message: 'You have exceeded the images limit. Maximum of 10',
-    });
+    return errorHandler(
+      req, res, 400, `Images limit exceeded. Only ${10 - imageCount} slots available`,
+    );
   }
 
-  // to Cloudinary
+  // upload images to Cloudinary
+
   const imagePromise = await images.map(async (image) => {
-    const imageBody = dataURI(image).content;
+    const imageBody = dataUri(image).content;
     try {
       const result = await uploader.upload(imageBody, {
         folder: `howmies/properties/${pID}`,
@@ -78,47 +77,27 @@ module.exports = async (req, res) => {
     }
   });
 
-  const imageURLs = await Promise.all(imagePromise).catch(() => null);
+  // save images to database
 
-  if (!imageURLs) {
-    return res.status(500).send({
-      remark: 'Error',
-      message: 'Error uploading file',
+  let uploadError;
+
+  Promise
+    .all(imagePromise)
+    .then((result) => {
+      imageModel.create(result, pID)
+        .catch(() => errorHandler(req, res));
+    })
+    .catch(() => {
+      uploadError = {
+        error: () => errorHandler(req, res, 500, 'Images could not be uploaded'),
+      };
     });
+
+  if (uploadError && uploadError.error) {
+    return uploadError.error();
   }
 
-  // insert image URLs to database
-  const insertArr = (imageURLs.length > 0) ? () => {
-    let text = '';
-    for (let i = 0; i < imageURLs.length; i += 1) {
-      if (i === imageURLs.length - 1) {
-        text += `('${imageURLs[i]}', ${pID})`;
-      } else {
-        text += `('${imageURLs[i]}', ${pID}), `;
-      }
-    }
-    return text;
-  } : null;
-
-  const savedImages = (insertArr) ? await pool.query(
-    `INSERT INTO images(image_url, property_id)
-      VALUES${insertArr()}
-    RETURNING *;`,
-  )
-    .then((result) => result.rows)
-    .catch(() => null)
-    : null;
-
-  if (savedImages && savedImages.length > 0) {
-    res.status(200).send({
-      remark: 'Success',
-      message: 'Image upload succesful',
-      data: savedImages,
-    });
-  } else {
-    res.status(500).send({
-      remark: 'Error',
-      message: 'No images for this post',
-    });
-  }
+  return res.status(201).send({
+    message: 'Images uploaded succesfully',
+  });
 };

@@ -6,5 +6,7 @@ module.exports = class {
     return bcrypt.hashSync(value, salt);
   }
 
-  static verifyHash() { }
+  static verifyHash(password, passwordHash) {
+    return bcrypt.compareSync(password, passwordHash);
+  }
 };

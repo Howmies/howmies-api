@@ -1,35 +1,36 @@
-/* eslint-disable no-console */
-
 const dotenv = require('dotenv');
 const request = require('request');
 const app = require('../app');
+const consoleLog = require('../utils/log-to-console');
 const { deleteByEmail } = require('../models/users-model');
-
-dotenv.config();
-
-const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}/auth/users/signup`;
-
-// setup server
-
-const normalizePort = (val) => {
-  const port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    return val;
-  }
-  if (port >= 0) {
-    return port;
-  }
-  return false;
-};
-
-const port = normalizePort(process.env.PORT);
-
-let server;
 
 // encapsulate server session
 
 describe('POST /auth/users/signup', () => {
+  dotenv.config();
+
+  process.env.NODE_ENV = 'test';
+
+  const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}/users/signup`;
+
+  // setup server
+
+  const normalizePort = (val) => {
+    const port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+      return val;
+    }
+    if (port >= 0) {
+      return port;
+    }
+    return false;
+  };
+
+  const port = normalizePort(process.env.PORT);
+
+  let server;
+
   beforeAll((done) => {
     server = app
       .set('port', port)
@@ -37,10 +38,11 @@ describe('POST /auth/users/signup', () => {
   });
 
   afterAll((done) => {
+    process.env.NODE_ENV = 'development';
     server.close(() => {
       done();
-      console.log(
-        '\x1b[42m\x1b[30m', 'Finished user signup tests\x1b[0m\n',
+      consoleLog(
+        '\x1b[42m\x1b[30m Finished user signup tests\x1b[0m\n',
       );
     });
   });
@@ -53,7 +55,7 @@ describe('POST /auth/users/signup', () => {
     const reqBody = {
       firstName: 'John',
       lastName: 'Doe',
-      email: 'user@howmies.test',
+      email: 'john_doe@howmies.com',
       phone: '+2348012345678',
       password: 'howmiesAPIv1',
       confirmPassword: 'howmiesAPIv1',
@@ -75,16 +77,16 @@ describe('POST /auth/users/signup', () => {
 
     afterEach(async (done) => {
       try {
-        await deleteByEmail('user@howmies.test');
+        await deleteByEmail('john_doe@howmies.com');
         done();
-        console.log('Test complete for user signup');
+        consoleLog('Test complete for user signup');
       } catch (error) {
         done();
       }
     });
 
     it('responds with Status 200', () => {
-      const expected = 200;
+      const expected = 201;
       expect(result.status).toBe(expected);
     });
   });
@@ -95,7 +97,7 @@ describe('POST /auth/users/signup', () => {
     const reqBody = {
       firstName: 'John',
       lastName: 'Doe',
-      email: 'user@howmies.test',
+      email: 'john_doe@howmies.com',
       phone: '+2348012345678',
       password: 'howmiesAPIv1',
     };
@@ -116,7 +118,7 @@ describe('POST /auth/users/signup', () => {
 
     afterEach(async (done) => {
       done();
-      console.log('Test complete for user signup without confirming password');
+      consoleLog('Test complete for user signup without confirming password');
     });
 
     it('responds with Status 422', () => {
@@ -131,7 +133,7 @@ describe('POST /auth/users/signup', () => {
     const reqBody = {
       firstName: 'John',
       lastName: 'Doe',
-      email: 'user@howmies.test',
+      email: 'john_doe@howmies.com',
       phone: '',
       password: 'howmiesAPIv1',
       confirmPassword: 'howmiesAPIv1',
@@ -153,7 +155,7 @@ describe('POST /auth/users/signup', () => {
 
     afterEach(async (done) => {
       done();
-      console.log('Test complete for user signup without phone number');
+      consoleLog('Test complete for user signup without phone number');
     });
 
     it('responds with Status 422', () => {

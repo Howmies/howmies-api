@@ -2,7 +2,7 @@
  * @description Returns an error response
  * @param {Request} req http request object
  * @param {Response} res http response object
- * @param {Number} status http error status
+ * @param {Number} [status=500] http error status
  * @param {String} message custom error message
  * @returns {Response} http response with error status and message
  */

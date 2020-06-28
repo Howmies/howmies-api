@@ -1,8 +1,36 @@
+-- drop tables
+
+DROP TABLE IF EXISTS auths CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS property_types CASCADE;
+DROP TABLE IF EXISTS status_periods CASCADE;
+DROP TABLE IF EXISTS status_types CASCADE;
+DROP TABLE IF EXISTS properties CASCADE;
+DROP TABLE IF EXISTS images CASCADE;
+DROP TABLE IF EXISTS features CASCADE;
+DROP TABLE IF EXISTS properties_and_features CASCADE;
+
+
+-- create sequences
+
+
 CREATE SEQUENCE auths_id_seq;
-CREATE TABLE
-IF NOT EXISTS auths
+CREATE SEQUENCE users_id_seq;
+CREATE SEQUENCE property_types_id_seq;
+CREATE SEQUENCE status_periods_id_seq;
+CREATE SEQUENCE status_types_id_seq;
+CREATE SEQUENCE properties_id_seq;
+CREATE SEQUENCE images_id_seq;
+CREATE SEQUENCE features_id_seq;
+CREATE SEQUENCE properties_and_features_id_seq;
+
+
+-- create tables
+
+
+CREATE TABLE IF NOT EXISTS auths
 (
-    "id" integer NOT NULL DEFAULT nextval('auths_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     email character varying(100) COLLATE pg_catalog."default" NOT NULL,
     "password" character varying(1024) COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
@@ -11,11 +39,9 @@ IF NOT EXISTS auths
     CONSTRAINT auths_email_key UNIQUE (email)
 );
 
-CREATE SEQUENCE users_id_seq;
-CREATE TABLE
-IF NOT EXISTS users
+CREATE TABLE IF NOT EXISTS users
 (
-    "id" integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     email character varying(100) COLLATE pg_catalog."default" NOT NULL,
     "password" character varying(1024) COLLATE pg_catalog."default",
     first_name character varying(20) COLLATE pg_catalog."default" NOT NULL,
@@ -28,12 +54,10 @@ IF NOT EXISTS users
     CONSTRAINT users_phone_key UNIQUE (phone)
 );
 
-CREATE SEQUENCE property_types_id_seq;
-CREATE TABLE
-IF NOT EXISTS property_types
+CREATE TABLE IF NOT EXISTS property_types
 (
-    "id" integer NOT NULL DEFAULT nextval('property_types_id_seq'::regclass),
-    name character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    "id" integer GENERATED ALWAYS AS IDENTITY,
+    name character varying(20) COLLATE pg_catalog."default" NOT NULL,
     "desc" character varying(128) COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
@@ -41,11 +65,9 @@ IF NOT EXISTS property_types
     CONSTRAINT property_types_property_name_key UNIQUE (name)
 );
 
-CREATE SEQUENCE status_periods_id_seq;
-CREATE TABLE
-IF NOT EXISTS status_periods
+CREATE TABLE IF NOT EXISTS status_periods
 (
-    "id" integer NOT NULL DEFAULT nextval('status_periods_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     name character varying(20) COLLATE pg_catalog."default" NOT NULL,
     "desc" text COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
@@ -54,11 +76,9 @@ IF NOT EXISTS status_periods
     CONSTRAINT status_periods_name_key UNIQUE (name)
 );
 
-CREATE SEQUENCE status_types_id_seq;
-CREATE TABLE
-IF NOT EXISTS status_types
+CREATE TABLE IF NOT EXISTS status_types
 (
-    "id" integer NOT NULL DEFAULT nextval('status_types_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     name character varying(20) COLLATE pg_catalog."default",
     "desc" text COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
@@ -67,11 +87,9 @@ IF NOT EXISTS status_types
     CONSTRAINT status_types_name_key UNIQUE (name)
 );
 
-CREATE SEQUENCE properties_id_seq;
-CREATE TABLE
-IF NOT EXISTS properties
+CREATE TABLE IF NOT EXISTS properties
 (
-    "id" integer NOT NULL DEFAULT nextval('properties_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     address character varying(56) COLLATE pg_catalog."default" NOT NULL,
     lga character varying(20) COLLATE pg_catalog."default" NOT NULL,
     "state" character varying(20) COLLATE pg_catalog."default" NOT NULL,
@@ -104,11 +122,9 @@ IF NOT EXISTS properties
         ON DELETE SET NULL
 );
 
-CREATE SEQUENCE images_id_seq;
-CREATE TABLE
-IF NOT EXISTS images
+CREATE TABLE IF NOT EXISTS images
 (
-    "id" integer NOT NULL DEFAULT nextval('images_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     image_url text COLLATE pg_catalog."default" NOT NULL,
     property_id integer NOT NULL,
     date_time_created timestamptz NOT NULL,
@@ -120,11 +136,9 @@ IF NOT EXISTS images
         ON DELETE CASCADE
 );
 
-CREATE SEQUENCE features_id_seq;
-CREATE TABLE
-IF NOT EXISTS features
+CREATE TABLE IF NOT EXISTS features
 (
-    "id" integer NOT NULL DEFAULT nextval('features_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     name character varying(32) COLLATE pg_catalog."default" NOT NULL,
     "desc" text COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
@@ -133,11 +147,9 @@ IF NOT EXISTS features
     CONSTRAINT features_name_key UNIQUE (name)
 );
 
-CREATE SEQUENCE properties_and_features_id_seq;
-CREATE TABLE
-IF NOT EXISTS properties_and_features
+CREATE TABLE IF NOT EXISTS properties_and_features
 (
-    "id" integer NOT NULL DEFAULT nextval('properties_and_features_id_seq'::regclass),
+    "id" integer GENERATED ALWAYS AS IDENTITY,
     property_id integer NOT NULL,
     feature_id integer NOT NULL,
     date_time_created timestamptz NOT NULL,
@@ -151,6 +163,10 @@ IF NOT EXISTS properties_and_features
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
+
+
+-- create functions
+
 
 CREATE FUNCTION public.timestamp_on_create()
     RETURNS trigger
@@ -177,6 +193,10 @@ END;$BODY$;
 
 COMMENT ON FUNCTION public.timestamp_on_modify()
     IS 'Time stamp to track the date and time of modification of a table row data';
+
+
+-- create triggers
+
 
 CREATE TRIGGER auths_timestamp_on_create
     BEFORE INSERT
@@ -338,3 +358,40 @@ CREATE TRIGGER properties_and_features_timestamp_on_create
 
 COMMENT ON TRIGGER properties_and_features_timestamp_on_create ON public.properties_and_features
     IS 'Date and time of creation of a feature for a property';
+
+
+-- create mocks
+
+
+INSERT INTO property_types("name") VALUES ('flat');
+
+INSERT INTO status_periods("name") VALUES ('yearly');
+
+INSERT INTO status_types("name") VALUES ('rent');
+
+INSERT INTO users(
+    first_name, last_name, email, phone, "password"
+) VALUES (
+    'Kati', 'Frantz',
+    'bahdcoder@gmail.com', '+2348106133567',
+    'Password-1234'
+);
+
+INSERT INTO properties(
+    owner_id, "type_id", status_id, period_id, price, "state", lga, address, "desc", email, phone
+) VALUES (
+    1, 1, 1, 1, 150000,
+    'Lagos', 'Agege',
+    'Block 12 - Flat 2, Dairy Farm Estate, Agege, Lagos.',
+    'A 4-bedroom flat with in a very serene environment where you can enjoy your luxury peacefully.',
+    'tobia807@howmies.com', '+2348022345678'
+);
+
+INSERT INTO images(property_id, image_url) VALUES (
+    1,
+    'http://res.cloudinary.com/daygucgkt/image/upload/v1583172280/howmies/properties/107/priosouercw1nuackdds.jpg'
+);
+
+INSERT INTO properties_and_features(
+    property_id, feature_id
+) VALUES (1, 1);

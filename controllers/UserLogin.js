@@ -6,9 +6,9 @@ const LoginProcessor = require('../utils/login-handler');
 
 dotenv.config();
 
-module.exports = async (req, response) => {
+module.exports = async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) { return response.status(422).send({ message: errors.array() }); }
+  if (!errors.isEmpty()) { return res.status(422).send({ message: errors.array() }); }
 
   const { email, password } = req.body;
 
@@ -31,14 +31,14 @@ module.exports = async (req, response) => {
     .catch(() => ({ error: 'Internal Server Error. Try again' }));
 
   if (user && user.error) {
-    return response.status(500).send({
+    return res.status(500).send({
       remark: 'Error',
       message: user.error,
     });
   }
 
   if (!user || !user.data) {
-    return response.status(403).send({
+    return res.status(403).send({
       remark: 'Error',
       message: 'Incorrect email or password',
     });
@@ -50,5 +50,5 @@ module.exports = async (req, response) => {
 
   const loginProcessor = new LoginProcessor(uid, name, telephone, emailAddress);
 
-  loginProcessor.successResponse(response);
+  loginProcessor.successResponse(res);
 };

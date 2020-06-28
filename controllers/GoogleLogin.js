@@ -1,91 +1,63 @@
 const passport = require('passport');
-const dotenv = require('dotenv');
-const bcrypt = require('bcryptjs');
 const strategy = require('passport-google-oauth20');
-const pool = require('../configs/elephantsql');
 const googleLogin = require('../configs/googleConfig');
+const UserModel = require('../models/users-model');
+const HashHandler = require('../utils/hash-handler');
 const LoginProcessor = require('../utils/login-handler');
 
 const GoogleStrategy = strategy.Strategy;
 
-dotenv.config();
-
-// Sign Google user up
-const salt = bcrypt.genSaltSync(10);
-
-const cryptedGoogleID = (googleID) => bcrypt.hash(googleID, salt);
+// Sign up Google user
 
 const registerGoogleUser = async (firstName, lastName, email, googleID, done) => {
-  await pool.query(
-    `INSERT INTO users(first_name, last_name, email, password, register_date)
-    VALUES($1, $2, $3, $4, $5)
-    RETURNING *`,
-    [
-      firstName,
-      lastName,
-      email,
-      cryptedGoogleID(googleID),
-      Date.now(),
-    ],
-    (err, result) => {
-      if (err || (result.rows && result.rows.length === 0)) {
-        return done(JSON.stringify({
-          remark: 'Error',
-          message: 'Internal server error',
-        }));
-      }
+  const passwordHash = HashHandler.generateHash(googleID);
+  try {
+    const newUser = await UserModel.create(
+      email, null, passwordHash, firstName, lastName,
+    );
 
-      const uid = result.rows[0].id;
-      const username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
-      const telephone = '';
-      const userEmail = result.rows[0].email;
+    const uid = newUser.id;
+    const username = `${newUser.first_name} ${newUser.last_name}`;
+    const telephone = '';
+    const userEmail = newUser.email;
 
-      const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
+    const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
+    const user = { loginProcessor };
+    module.exports.newUser = user;
 
-      const user = { loginProcessor };
-
-      module.exports.newUser = user;
-      return done(null, user);
-    },
-  );
-
-  return null;
+    return done(null, user);
+  } catch (error) {
+    return done(JSON.stringify({
+      remark: 'Error',
+      message: 'Internal server error',
+    }));
+  }
 };
 
 // Check if Google user is an in-app registered user
 const checkRegisteredUser = async (email, done, firstName, lastName, googleID) => {
-  await pool.query(
-    'SELECT * FROM users WHERE email=$1',
-    [email],
-    (err, result) => {
-      if (err) {
-        return done(JSON.stringify({
-          remark: 'Error',
-          message: 'Internal server error',
-        }));
-      }
+  try {
+    const existingUser = await UserModel.getByEmail(email);
+    if (!existingUser) {
+      return registerGoogleUser(firstName, lastName, email, googleID, done);
+    }
 
-      if (result.rows && result.rows.length === 0) {
-        return registerGoogleUser(firstName, lastName, email, googleID, done);
-      }
+    const uid = existingUser.id;
+    const username = `${existingUser.first_name} ${existingUser.last_name}`;
+    const telephone = '';
+    const userEmail = existingUser.email;
 
-      if (result.rows && result.rows.length === 1) {
-        const uid = result.rows[0].id;
-        const username = `${result.rows[0].first_name} ${result.rows[0].last_name}`;
-        const telephone = '';
-        const userEmail = result.rows[0].email;
+    const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
+    const user = { loginProcessor };
+    module.exports.loggedUser = user;
 
-        const loginProcessor = new LoginProcessor(uid, username, telephone, userEmail);
-
-        const user = { loginProcessor };
-
-        module.exports.loggedUser = user;
-        return done(null, user);
-      }
-    },
-  );
-
-  return null;
+    return done(null, user);
+  } catch (error) {
+    return done(JSON.stringify({
+      remark: 'Error',
+      message: 'Internal server error',
+    }));
+  }
 };
 
 passport.use(
