@@ -377,6 +377,8 @@ INSERT INTO users(
     'Password-1234'
 );
 
+INSERT INTO features("name") VALUES ('air conditioner');
+
 INSERT INTO properties(
     owner_id, "type_id", status_id, period_id, price, "state", lga, address, "desc", email, phone
 ) VALUES (
