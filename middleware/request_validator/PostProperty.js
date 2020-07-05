@@ -1,13 +1,6 @@
-const { body, header } = require('express-validator');
+const { body } = require('express-validator');
 
 module.exports = [
-  header('Authorization')
-    .trim(' ')
-    .notEmpty()
-    .withMessage('Invalid accessibility')
-    .isJWT()
-    .withMessage('Invalid accessibles')
-    .escape(),
   body('type')
     .trim(' ')
     .notEmpty()

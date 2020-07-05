@@ -85,7 +85,7 @@ describe('POST /auth/users/signup', () => {
       }
     });
 
-    it('responds with Status 200', () => {
+    it('responds with Status 201', () => {
       const expected = 201;
       expect(result.status).toBe(expected);
     });
@@ -117,8 +117,13 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach(async (done) => {
-      done();
-      consoleLog('Test complete for user signup without confirming password');
+      try {
+        await deleteByEmail('john_doe@howmies.com');
+        done();
+        consoleLog('Test complete for user signup without confirming password');
+      } catch (error) {
+        done();
+      }
     });
 
     it('responds with Status 422', () => {
@@ -154,8 +159,13 @@ describe('POST /auth/users/signup', () => {
     });
 
     afterEach(async (done) => {
-      done();
-      consoleLog('Test complete for user signup without phone number');
+      try {
+        await deleteByEmail('john_doe@howmies.com');
+        done();
+        consoleLog('Test complete for user signup without phone number');
+      } catch (error) {
+        done();
+      }
     });
 
     it('responds with Status 422', () => {

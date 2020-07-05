@@ -27,8 +27,6 @@ module.exports = (req, res, status = 500, message) => {
         errMessage = 'Internal server error';
         break;
     }
-  } else {
-    errMessage = message;
-  }
+  } else errMessage = message;
   return res.status(status).send({ message: errMessage });
 };

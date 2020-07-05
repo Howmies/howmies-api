@@ -8,8 +8,7 @@ module.exports = class {
    */
 
   static async getByEmail(email) {
-    const queryString = `SELECT * FROM users
-    WHERE email=$1;`;
+    const queryString = 'SELECT * FROM users WHERE email=$1;';
     const queryValues = [email];
     try {
       const { rows } = await pool.query(queryString, queryValues);
@@ -27,8 +26,7 @@ module.exports = class {
    */
 
   static async getByEmailOrPhone(email, phone) {
-    const queryString = `SELECT email, phone FROM users
-    WHERE
+    const queryString = `SELECT email, phone FROM users WHERE
     (email=$1 AND phone IS NOT NULL)
     OR
     (phone=$2 AND email IS NOT NULL);`;
