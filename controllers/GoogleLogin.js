@@ -65,7 +65,9 @@ passport.use(
     googleLogin,
     ((accessTokenHowmies, refreshTokenHowmies, profile, done) => {
       const {
+        // eslint-disable-next-line camelcase
         email, sub, given_name, family_name,
+        // eslint-disable-next-line no-underscore-dangle
       } = profile._json;
 
       return checkRegisteredUser(email, done, given_name, family_name, sub);

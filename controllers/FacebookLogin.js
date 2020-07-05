@@ -65,7 +65,9 @@ passport.use(
     facebookLogin,
     ((accessTokenHowmies, refreshTokenHowmies, profile, done) => {
       const {
+        // eslint-disable-next-line camelcase
         email, id, first_name, last_name,
+        // eslint-disable-next-line no-underscore-dangle
       } = profile._json;
 
       return checkRegisteredUser(email, done, first_name, last_name, id);
