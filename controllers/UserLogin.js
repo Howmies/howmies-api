@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
   }
 
   if (!user || !user.data) {
-    return res.status(403).send({
+    return res.status(401).send({
       remark: 'Error',
       message: 'Incorrect email or password',
     });

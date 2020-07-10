@@ -374,7 +374,7 @@ INSERT INTO users(
 ) VALUES (
     'Kati', 'Frantz',
     'bahdcoder@gmail.com', '+2348106133567',
-    'Password-1234'
+    '$2a$10$8oMvZQUHR409ngqm0KMRDOHuUd4ZYpgxaLI5c1yRvBtaJWbvRsv8i'
 );
 
 INSERT INTO features("name") VALUES ('air conditioner');
