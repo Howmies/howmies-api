@@ -14,15 +14,15 @@ DROP TABLE IF EXISTS properties_and_features CASCADE;
 -- create sequences
 
 
-CREATE SEQUENCE auths_id_seq;
-CREATE SEQUENCE users_id_seq;
-CREATE SEQUENCE property_types_id_seq;
-CREATE SEQUENCE status_periods_id_seq;
-CREATE SEQUENCE status_types_id_seq;
-CREATE SEQUENCE properties_id_seq;
-CREATE SEQUENCE images_id_seq;
-CREATE SEQUENCE features_id_seq;
-CREATE SEQUENCE properties_and_features_id_seq;
+CREATE SEQUENCE IF NOT EXISTS auths_id_seq;
+CREATE SEQUENCE IF NOT EXISTS users_id_seq;
+CREATE SEQUENCE IF NOT EXISTS property_types_id_seq;
+CREATE SEQUENCE IF NOT EXISTS status_periods_id_seq;
+CREATE SEQUENCE IF NOT EXISTS status_types_id_seq;
+CREATE SEQUENCE IF NOT EXISTS properties_id_seq;
+CREATE SEQUENCE IF NOT EXISTS images_id_seq;
+CREATE SEQUENCE IF NOT EXISTS features_id_seq;
+CREATE SEQUENCE IF NOT EXISTS properties_and_features_id_seq;
 
 
 -- create tables
@@ -30,9 +30,10 @@ CREATE SEQUENCE properties_and_features_id_seq;
 
 CREATE TABLE IF NOT EXISTS auths
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    email character varying(100) COLLATE pg_catalog."default" NOT NULL,
-    "password" character varying(1024) COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    email CHARACTER VARYING (100) COLLATE pg_catalog."default" NOT NULL,
+    "password" CHARACTER VARYING (1024) COLLATE pg_catalog."default",
+    _v INTEGER DEFAULT 1 NOT NULL,
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT auths_pkey PRIMARY KEY ("id"),
@@ -41,12 +42,13 @@ CREATE TABLE IF NOT EXISTS auths
 
 CREATE TABLE IF NOT EXISTS users
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    email character varying(100) COLLATE pg_catalog."default" NOT NULL,
-    "password" character varying(1024) COLLATE pg_catalog."default",
-    first_name character varying(20) COLLATE pg_catalog."default" NOT NULL,
-    last_name character varying(20) COLLATE pg_catalog."default" NOT NULL,
-    phone character varying(20) COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    email CHARACTER VARYING (100) COLLATE pg_catalog."default" NOT NULL,
+    "password" CHARACTER VARYING (1024) COLLATE pg_catalog."default",
+    first_name CHARACTER VARYING (20) COLLATE pg_catalog."default" NOT NULL,
+    last_name CHARACTER VARYING (20) COLLATE pg_catalog."default" NOT NULL,
+    phone CHARACTER VARYING (20) COLLATE pg_catalog."default",
+    _v INTEGER DEFAULT 1 NOT NULL,
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT users_pkey PRIMARY KEY ("id"),
@@ -56,9 +58,9 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS property_types
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    name character varying(20) COLLATE pg_catalog."default" NOT NULL,
-    "desc" character varying(128) COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    name CHARACTER VARYING (20) COLLATE pg_catalog."default" NOT NULL,
+    "desc" CHARACTER VARYING (128) COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT property_types_pkey PRIMARY KEY ("id"),
@@ -67,9 +69,9 @@ CREATE TABLE IF NOT EXISTS property_types
 
 CREATE TABLE IF NOT EXISTS status_periods
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    name character varying(20) COLLATE pg_catalog."default" NOT NULL,
-    "desc" text COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    name CHARACTER VARYING (20) COLLATE pg_catalog."default" NOT NULL,
+    "desc" TEXT COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT status_periods_pkey PRIMARY KEY ("id"),
@@ -78,9 +80,9 @@ CREATE TABLE IF NOT EXISTS status_periods
 
 CREATE TABLE IF NOT EXISTS status_types
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    name character varying(20) COLLATE pg_catalog."default",
-    "desc" text COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    name CHARACTER VARYING (20) COLLATE pg_catalog."default",
+    "desc" TEXT COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT status_types_pkey PRIMARY KEY ("id"),
@@ -89,18 +91,18 @@ CREATE TABLE IF NOT EXISTS status_types
 
 CREATE TABLE IF NOT EXISTS properties
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    address character varying(56) COLLATE pg_catalog."default" NOT NULL,
-    lga character varying(20) COLLATE pg_catalog."default" NOT NULL,
-    "state" character varying(20) COLLATE pg_catalog."default" NOT NULL,
-    price numeric NOT NULL,
-    "desc" text COLLATE pg_catalog."default",
-    owner_id integer NOT NULL,
-    status_id integer NOT NULL,
-    period_id integer NOT NULL,
-    type_id integer NOT NULL,
-    email character varying(100) COLLATE pg_catalog."default",
-    phone character varying(20) COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    address CHARACTER VARYING (56) COLLATE pg_catalog."default" NOT NULL,
+    lga CHARACTER VARYING (20) COLLATE pg_catalog."default" NOT NULL,
+    "state" CHARACTER VARYING (20) COLLATE pg_catalog."default" NOT NULL,
+    price NUMERIC NOT NULL,
+    "desc" TEXT COLLATE pg_catalog."default",
+    owner_id INTEGER NOT NULL,
+    status_id INTEGER NOT NULL,
+    period_id INTEGER NOT NULL,
+    type_id INTEGER NOT NULL,
+    email CHARACTER VARYING (100) COLLATE pg_catalog."default",
+    phone CHARACTER VARYING (20) COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT properties_pkey PRIMARY KEY ("id"),
@@ -124,9 +126,9 @@ CREATE TABLE IF NOT EXISTS properties
 
 CREATE TABLE IF NOT EXISTS images
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    image_url text COLLATE pg_catalog."default" NOT NULL,
-    property_id integer NOT NULL,
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    image_url TEXT COLLATE pg_catalog."default" NOT NULL,
+    property_id INTEGER NOT NULL,
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT images_pkey PRIMARY KEY ("id"),
@@ -138,9 +140,9 @@ CREATE TABLE IF NOT EXISTS images
 
 CREATE TABLE IF NOT EXISTS features
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    name character varying(32) COLLATE pg_catalog."default" NOT NULL,
-    "desc" text COLLATE pg_catalog."default",
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    name CHARACTER VARYING (32) COLLATE pg_catalog."default" NOT NULL,
+    "desc" TEXT COLLATE pg_catalog."default",
     date_time_created timestamptz NOT NULL,
     date_time_modified timestamptz NOT NULL,
     CONSTRAINT features_pkey PRIMARY KEY ("id"),
@@ -149,9 +151,9 @@ CREATE TABLE IF NOT EXISTS features
 
 CREATE TABLE IF NOT EXISTS properties_and_features
 (
-    "id" integer GENERATED ALWAYS AS IDENTITY,
-    property_id integer NOT NULL,
-    feature_id integer NOT NULL,
+    "id" INTEGER GENERATED ALWAYS AS IDENTITY,
+    property_id INTEGER NOT NULL,
+    feature_id INTEGER NOT NULL,
     date_time_created timestamptz NOT NULL,
     CONSTRAINT properties_features_pkey PRIMARY KEY ("id"),
     CONSTRAINT features_feature_id_fkey FOREIGN KEY (feature_id)
@@ -194,6 +196,19 @@ END;$BODY$;
 COMMENT ON FUNCTION public.timestamp_on_modify()
     IS 'Time stamp to track the date and time of modification of a table row data';
 
+CREATE FUNCTION public.data_version_on_modify()
+    RETURNS TRIGGER
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$BEGIN
+	NEW._v := NEW._v + 1;
+	RETURN NEW;
+END;$BODY$;
+
+COMMENT ON FUNCTION public.data_version_on_modify()
+    IS 'Data version to track the version of the current row due to updates';
+
 
 -- create triggers
 
@@ -217,6 +232,16 @@ CREATE TRIGGER auths_timestamp_on_modify
 COMMENT ON TRIGGER auths_timestamp_on_modify ON public.auths
     IS 'Date and time of modification of a user authentication detail';
 
+
+CREATE TRIGGER auths_data_version_on_modify
+    BEFORE UPDATE
+    ON public.auths
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.data_version_on_modify();
+
+COMMENT ON TRIGGER auths_data_version_on_modify ON public.auths
+    IS 'Authentication versioning';
+
 CREATE TRIGGER users_timestamp_on_create
     BEFORE INSERT
     ON public.users
@@ -235,6 +260,16 @@ CREATE TRIGGER users_timestamp_on_modify
 
 COMMENT ON TRIGGER users_timestamp_on_modify ON public.users
     IS 'Date and time of modification of a user account';
+
+
+CREATE TRIGGER users_data_version_on_modify
+    BEFORE UPDATE
+    ON public.users
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.data_version_on_modify();
+
+COMMENT ON TRIGGER users_data_version_on_modify ON public.users
+    IS 'User profile versioning';
 
 CREATE TRIGGER properties_timestamp_on_create
     BEFORE INSERT

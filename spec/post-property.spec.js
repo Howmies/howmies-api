@@ -31,14 +31,12 @@ xdescribe('POST /auth/properties', () => {
   let server;
 
   beforeAll((done) => {
-    process.env.NODE_ENV = 'test';
     server = app
       .set('port', port)
       .listen(port, () => done());
   });
 
   afterAll((done) => {
-    process.env.NODE_ENV = 'development';
     server.close(() => {
       done();
       consoleLog(

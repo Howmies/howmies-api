@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
   // check if user already exists
 
   try {
-    const userExists = await Users.getByEmailOrPhone(email, phone);
+    const userExists = await Users.countByEmailOrPhone(email, phone);
     if (userExists > 0) {
       const message = 'Phone number or email already exists. Please login or sign up with a new credential.';
       return errorHandler(req, res, 403, message);
@@ -38,8 +38,8 @@ module.exports = async (req, res) => {
   // create user account
 
   try {
-    const { id } = await Users.create(email, phone, passwordHash, firstName, lastName);
-    new LoginProcessor(id, `${firstName} ${lastName}`, phone, email)
+    const { id, _v } = await Users.create(email, phone, passwordHash, firstName, lastName);
+    new LoginProcessor(id, _v, `${firstName} ${lastName}`, phone, email)
       .successResponse(res, 201);
   } catch (err) {
     return errorHandler(req, res);

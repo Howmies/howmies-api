@@ -2,6 +2,8 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const LoginProcessor = require('../utils/login-handler');
+const User = require('../models/users-model');
+const errorHandler = require('../utils/error-handler');
 
 dotenv.config();
 
@@ -11,7 +13,7 @@ module.exports = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) { return res.status(422).send({ message: errors.array() }); }
 
-  // verify token validation
+  // verify refresh token
 
   const refreshToken = req.cookies.HURT;
 
@@ -47,14 +49,23 @@ module.exports = async (req, res) => {
   // for valid token, auto sign-in user
 
   const {
-    uid, data,
+    uid, data, _v,
   } = tokenVerification;
 
   const {
     username, telephone, email,
   } = data;
 
-  const loginProcessor = new LoginProcessor(uid, username, telephone, email);
+  // ensure the current user is the real account owner or allowed user
+
+  try {
+    const realUser = await User.countByEmailAndAuthVersion(email, _v);
+    if (realUser !== 1) throw new Error('Login with the updated password');
+  } catch (error) {
+    return errorHandler(req, res, 403);
+  }
+
+  const loginProcessor = new LoginProcessor(uid, _v, username, telephone, email);
 
   loginProcessor.successResponse(res);
 };

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 /**
- * Verify the user's authenticity
+ * @description Verify the user's authenticity.
  * @param {String} token The user's token.
  * The token can be derived from the header, cookie or url.
  * @param {String} secret The secret key that was used to sign the expected token.
@@ -12,7 +12,8 @@ module.exports = async (token, secret, audience) => jwt.verify(
   secret,
   {
     algorithms: ['HS256'],
-    audience,
+    audience: audience === 'user' || audience === 'admin'
+      ? audience : null,
     issuer: 'Howmies Entreprise',
   },
   (err, result) => {
@@ -21,19 +22,13 @@ module.exports = async (token, secret, audience) => jwt.verify(
     }
     switch (result.aud) {
       case 'user':
-        /**
-           * @type {Number} The user ID
-           */
         return Promise.resolve(result.uid);
 
       case 'admin':
-        /**
-           * @type {Number} The admin ID
-           */
         return Promise.resolve(result.uid);
 
       default:
-        break;
+        return Promise.reject(new Error({ message: 'Privileged user not found' }));
     }
   },
 );

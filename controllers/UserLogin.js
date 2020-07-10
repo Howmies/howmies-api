@@ -24,6 +24,8 @@ module.exports = async (req, res) => {
             name: `${result.rows[0].first_name} ${result.rows[0].last_name}`,
             telephone: result.rows[0].phone,
             emailAddress: result.rows[0].email,
+            // eslint-disable-next-line no-underscore-dangle
+            _v: result.rows[0]._v,
           },
         };
       }
@@ -45,10 +47,10 @@ module.exports = async (req, res) => {
   }
 
   const {
-    uid, name, telephone, emailAddress,
+    uid, _v, name, telephone, emailAddress,
   } = user.data;
 
-  const loginProcessor = new LoginProcessor(uid, name, telephone, emailAddress);
+  const loginProcessor = new LoginProcessor(uid, _v, name, telephone, emailAddress);
 
   loginProcessor.successResponse(res);
 };
