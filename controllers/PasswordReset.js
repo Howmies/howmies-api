@@ -10,6 +10,12 @@ const HashHandler = require('../utils/hash-handler');
 
 dotenv.config();
 
+/**
+ * @description Sends an exception for user query in database
+ * where a given condition is not met.
+ * @param {String} message The exception
+ * Note: This is not meant for database errors.
+ */
 function UserException(message) {
   this.message = message;
   this.name = 'UserException';

@@ -26,13 +26,29 @@ module.exports = class {
    * @returns {Promise}  number of accounts associated with both the email and the phone number
    */
 
-  static async getByEmailOrPhone(email, phone) {
-    const queryString = `SELECT email, phone FROM users
-    WHERE
-    (email=$1 AND phone IS NOT NULL)
-    OR
-    (phone=$2 AND email IS NOT NULL);`;
+  static async countByEmailOrPhone(email, phone) {
+    const queryString = `SELECT id FROM users
+    WHERE (email=$1 AND phone IS NOT NULL)
+    OR (phone=$2 AND email IS NOT NULL);`;
     const queryValues = [email, phone];
+    try {
+      const { rowCount } = await pool.query(queryString, queryValues);
+      return Promise.resolve(rowCount);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  /**
+   * @description Check that a user is still authenticated by their version
+   * @param {String} email user's normalized email address
+   * @param {Number} authVersion current version of user authentication
+   * @returns {Promise}  number of accounts associated with both the email and the auth version
+   */
+
+  static async countByEmailAndAuthVersion(email, authVersion) {
+    const queryString = 'SELECT id FROM users WHERE email=$1 AND _v=$2;';
+    const queryValues = [email, authVersion];
     try {
       const { rowCount } = await pool.query(queryString, queryValues);
       return Promise.resolve(rowCount);

@@ -10,8 +10,6 @@ const consoleLog = require('../utils/log-to-console');
 xdescribe('POST /auth/:property_id/images', () => {
   dotenv.config();
 
-  process.env.NODE_ENV = 'test';
-
   const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}/auth/2/images`;
 
   // setup server
@@ -39,7 +37,6 @@ xdescribe('POST /auth/:property_id/images', () => {
   });
 
   afterAll((done) => {
-    process.env.NODE_ENV = 'development';
     server.close(() => {
       done();
       consoleLog(

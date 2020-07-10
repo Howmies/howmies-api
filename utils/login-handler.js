@@ -21,11 +21,12 @@ module.exports = class {
   /**
    * Successfully log user in after all checks and other requirements have been fulfilled.
    * @param {Number} uid The user id.
+   * @param {Number} authVersion The current version of the user authentication in the database.
    * @param {String} username The first name and last name of the user.
    * @param {String} telephone The telephone number of the user.
    * @param {String} email The email address of the user.
    */
-  constructor(uid, username, telephone, email) {
+  constructor(uid, authVersion, username, telephone, email) {
     // user access token options
 
     const expiresIn = 900;
@@ -39,7 +40,12 @@ module.exports = class {
     };
 
     const accessToken = jwt.sign(
-      { iss, aud, uid },
+      {
+        iss,
+        aud,
+        uid,
+        _v: authVersion,
+      },
       tokenSecret.keyPrivate,
       { expiresIn, algorithm },
     );
@@ -55,7 +61,12 @@ module.exports = class {
     };
 
     const refreshToken = jwt.sign(
-      { exp, uid, data },
+      {
+        exp,
+        uid,
+        data,
+        _v: authVersion,
+      },
       tokenSecret.keyPrivate,
       { algorithm, issuer: iss, audience: aud },
     );
@@ -106,6 +117,7 @@ module.exports = class {
           telephone,
           email,
           expiresIn: expiresIn * 1000,
+          refreshesIn: 3600 * 24 * 30 * 1000,
         },
       });
   }
