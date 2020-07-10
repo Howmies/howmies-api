@@ -6,30 +6,27 @@ const dataURI = new DataURI();
 
 const storage = multer.memoryStorage();
 
+const mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
 const fileFilter = (req, file, cb) => {
   const { mimetype } = file;
-  if (mimetype === 'image/jpeg'
-    || mimetype === 'image/png'
-    || mimetype === 'image/gif') {
+  if (mimeTypes.includes(mimetype)) {
     cb(null, true);
   } else {
-    req.imagesError = {
-      name: 'Error',
-      message: 'Unsupported file format\nEnsure your images are jpg, jpeg, png or gif',
-    };
     cb(null, false);
   }
 };
 
 const limits = { fileSize: 1024 * 1024 };
 
-exports.multerUpload = multer({
+const multerUpload = multer({
   storage,
   fileFilter,
   limits,
 }).array('images', 10);
 
-exports.dataURI = (image) => dataURI.format(
+const dataUri = (image) => dataURI.format(
   path.extname(image.originalname).toString(),
   image.buffer,
 );
+
+module.exports = { multerUpload, dataUri };

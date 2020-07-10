@@ -1,38 +1,41 @@
 // Import packages
-const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const mailer = require('../middleware/EmailHandler');
-const pool = require('../middleware/configs/elephantsql');
-const SessionValidator = require('../middleware/SessionValidator');
+const mailer = require('../utils/EmailHandler');
+const Users = require('../models/users-model');
+const errorHandler = require('../utils/error-handler');
+const sessionValidator = require('../utils/session-validator');
+const HashHandler = require('../utils/hash-handler');
 
 dotenv.config();
 
-const fetchUserFromDB = async (email, res) => pool
-  .query('SELECT * FROM users WHERE email=$1', [email])
+function UserException(message) {
+  this.message = message;
+  this.name = 'UserException';
+}
+
+const fetchUserFromDB = async (req, res, email) => Users.getByEmail(email)
   .then((result) => {
-    if (result.rows && result.rows.length === 1) {
+    if (result) {
       return {
-        firstName: result.rows[0].first_name,
-        uid: result.rows[0].id,
-        passwordCrypt: result.rows[0].password,
+        firstName: result.first_name,
+        uid: result.id,
+        passwordHash: result.password,
       };
     }
-
-    return {
-      error: () => res.status(403).send({
-        remark: 'Error',
-        message: 'Incorrect email',
-      }),
-    };
+    throw new UserException('User does not exist');
   })
-  .catch(() => ({
-    error: () => res.status(500).send({
-      remark: 'Error',
-      message: 'Internal Server Error. Try again',
-    }),
-  }));
+  .catch((err) => {
+    if (err instanceof UserException) {
+      return {
+        error: () => errorHandler(req, res, 401),
+      };
+    }
+    return {
+      error: () => errorHandler(req, res),
+    };
+  });
 
 // gets password and sends mail to user
 module.exports.forgotPassword = async (req, res) => {
@@ -44,7 +47,7 @@ module.exports.forgotPassword = async (req, res) => {
 
   // check that user exists
   const { email } = req.body;
-  const user = await fetchUserFromDB(email, res);
+  const user = await fetchUserFromDB(req, res, email);
 
   if (user.error) return user.error();
 
@@ -53,12 +56,13 @@ module.exports.forgotPassword = async (req, res) => {
   const aud = 'user';
   const iss = 'Howmies Entreprise';
   const algorithm = 'HS256';
+  const { uid } = user;
 
   const token = jwt.sign(
     {
-      iss, aud, email,
+      iss, aud, email, uid,
     },
-    user.passwordCrypt,
+    user.passwordHash,
     { expiresIn, algorithm },
   );
 
@@ -77,12 +81,6 @@ module.exports.forgotPassword = async (req, res) => {
   const text = 'Reset your password';
 
   mailer(email, subject, text, html)
-    .then((response) => {
-      res.send({
-        message: 'Mail sent successfully',
-        response,
-      });
-    })
     .catch((err) => {
       res
         .status(400)
@@ -91,6 +89,9 @@ module.exports.forgotPassword = async (req, res) => {
           error: err,
         });
     });
+  res.send({
+    message: 'Mail sent successfully',
+  });
 };
 
 // returns a form for the user to update their password
@@ -107,20 +108,20 @@ module.exports.resetForm = async (req, res) => {
   const payload = jwt.decode(resetToken);
   const { email } = payload;
 
-  const user = await fetchUserFromDB(email, res);
+  const user = await fetchUserFromDB(req, res, email);
 
   if (user.error) return user.error();
 
   // verify password reset session
 
-  const tokenVerifier = new SessionValidator(
-    resetToken,
-    user.passwordCrypt,
-    'user',
-  );
-
-  if (tokenVerifier.error) {
-    return tokenVerifier.errorResponse(res);
+  try {
+    await sessionValidator(
+      resetToken,
+      user.passwordHash,
+      'user',
+    );
+  } catch (error) {
+    errorHandler(req, res, 403);
   }
 
   const form = `
@@ -163,7 +164,7 @@ module.exports.resetForm = async (req, res) => {
   return res.send(form);
 };
 
-// updates the password in the db
+// updates the password in the database
 module.exports.updatePassword = async (req, res) => {
   // validate user request
   const errors = validationResult(req);
@@ -173,44 +174,43 @@ module.exports.updatePassword = async (req, res) => {
 
   const { resetToken } = req.params;
   const payload = jwt.decode(resetToken);
-  const { email } = payload;
+  const { email, uid } = payload;
 
-  const user = await fetchUserFromDB(email, res);
+  const user = await fetchUserFromDB(req, res, email);
 
   if (user.error) return user.error();
 
   // verify password reset session
 
-  const tokenVerifier = new SessionValidator(
-    resetToken,
-    user.passwordCrypt,
-    'user',
-  );
-
-  if (tokenVerifier.error) {
-    return tokenVerifier.errorResponse(res);
+  try {
+    await sessionValidator(
+      resetToken,
+      user.passwordHash,
+      'user',
+    );
+  } catch (err) {
+    errorHandler(req, res, 403);
   }
 
   // ensure new password and old password are not the same
 
   const { password } = req.body;
 
-  if (bcrypt.compareSync(password, user.passwordCrypt)) {
+  if (HashHandler.verifyHash(password, user.passwordHash)) {
+    const responseMessage = `<p style="font-size: 18px; color: red;">
+      Use a different password
+      </p>`;
     return res
       .status(400)
-      .send('<p>For safety and security, use a different password</p>');
+      .send(responseMessage);
   }
 
   // update user password
 
-  const salt = bcrypt.genSaltSync(10);
-  const passwordCrypt = bcrypt.hashSync(password, salt);
+  const passwordHash = HashHandler.generateHash(password);
 
-  await pool
-    .query(
-      'UPDATE users SET password=$1 WHERE email=$2',
-      [passwordCrypt, email],
-    )
+  Users
+    .update(uid, { password: passwordHash })
     .then(() => {
       // send confirmation mail to user
       const subject = 'Password Reset Success';
@@ -218,7 +218,14 @@ module.exports.updatePassword = async (req, res) => {
       const text = 'Your password has been reset';
 
       mailer(email, subject, text, html).catch(() => null);
-      return res.send('<p style=\'font-size: 20px;\'>Password reset successful. You can now login</p>');
+      res
+        .status(200)
+        .clearCookie('HURT', { path: '/api/v0.0.1/auth/refresh_token' })
+        .removeHeader('Authorization');
+      const responseMessage = `<p style="font-size: 18px; color: green;">
+      Password reset successful. You can now login
+      </p>`;
+      return res.send(responseMessage);
     })
-    .catch(() => res.status(500).send('Internal server error. Try again'));
+    .catch(() => errorHandler(req, res));
 };

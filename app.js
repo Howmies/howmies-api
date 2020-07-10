@@ -41,7 +41,8 @@ app.use(passport.initialize());
 
 const checkAPI = (resMessage = 'OK!') => express.Router().get('/', (req, res) => res.send({ message: resMessage }));
 
-app.use('/auth/users', [UserSignup, UserLogin, UserSignout]);
+app.use('/users', [UserSignup, UserLogin]);
+app.use('/auth/users', UserSignout);
 app.use('/auth/facebook', FacebookLogin);
 app.use('/auth/google', GoogleLogin);
 app.use('/password', PasswordReset);
