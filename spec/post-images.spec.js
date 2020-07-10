@@ -92,4 +92,4 @@ xdescribe('POST /auth/:property_id/images', () => {
       expect(result.status).toBe(expected);
     });
   });
-}).pend('Not figured out how to generate a long term token');
+});

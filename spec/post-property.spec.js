@@ -101,4 +101,4 @@ xdescribe('POST /auth/properties', () => {
       expect(result.status).toBe(expected);
     });
   });
-}).pend('Not figured out how to generate a long term token');
+});
