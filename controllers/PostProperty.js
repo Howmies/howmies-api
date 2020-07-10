@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       'user',
     );
   } catch (error) {
-    errorHandler(req, res, 403);
+    return errorHandler(req, res, 403);
   }
 
   // verify property details by user

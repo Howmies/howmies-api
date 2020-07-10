@@ -10,8 +10,6 @@ const consoleLog = require('../utils/log-to-console');
 xdescribe('POST /auth/properties', () => {
   dotenv.config();
 
-  process.env.NODE_ENV = 'test';
-
   const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}/auth/properties`;
 
   // setup server
@@ -33,6 +31,7 @@ xdescribe('POST /auth/properties', () => {
   let server;
 
   beforeAll((done) => {
+    process.env.NODE_ENV = 'test';
     server = app
       .set('port', port)
       .listen(port, () => done());
@@ -86,7 +85,6 @@ xdescribe('POST /auth/properties', () => {
       request(uri, options, (error, response, body) => {
         result.status = response.statusCode;
         result.message = body.message;
-        result.propertyId = body.data.propertyId;
         done();
       });
     });
@@ -103,4 +101,4 @@ xdescribe('POST /auth/properties', () => {
       expect(result.status).toBe(expected);
     });
   });
-});
+}).pend('Not figured out how to generate a long term token');

@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
       'user',
     );
   } catch (err) {
-    errorHandler(req, res, 403);
+    return errorHandler(req, res, 403);
   }
 
   // verify images

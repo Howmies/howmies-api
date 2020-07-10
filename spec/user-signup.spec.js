@@ -9,8 +9,6 @@ const { deleteByEmail } = require('../models/users-model');
 describe('POST /auth/users/signup', () => {
   dotenv.config();
 
-  process.env.NODE_ENV = 'test';
-
   const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}/users/signup`;
 
   // setup server
@@ -32,6 +30,7 @@ describe('POST /auth/users/signup', () => {
   let server;
 
   beforeAll((done) => {
+    process.env.NODE_ENV = 'test';
     server = app
       .set('port', port)
       .listen(port, () => done());

@@ -8,8 +8,6 @@ const consoleLog = require('../utils/log-to-console');
 describe('POST /users/login', () => {
   dotenv.config();
 
-  process.env.NODE_ENV = 'test';
-
   const uri = `http://localhost:${process.env.PORT}/api/${process.env.API_VERSION}/users/login`;
 
   // setup server
@@ -31,6 +29,7 @@ describe('POST /users/login', () => {
   let server;
 
   beforeAll(async (done) => {
+    process.env.NODE_ENV = 'test';
     server = app
       .set('port', port)
       .listen(port, () => done());

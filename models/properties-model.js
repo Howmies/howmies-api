@@ -25,7 +25,7 @@ module.exports = class {
    * @param {String} newPropertyData.desc Other details about the property.
    * @param {String} newPropertyData.phone Phone contact specific to the property if required.
    * @param {String} newPropertyData.email Email contact specific to the property if required.
-   * @returns {Response} The id of the housing property on success.
+   * @returns {Promise} The id of the housing property on success.
    */
 
   async create(
