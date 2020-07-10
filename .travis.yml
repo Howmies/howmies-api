@@ -7,8 +7,8 @@ install:
 services:
   - postgresql
 before_script:
-  - psql -c 'create database howmies;' -U postgres
-  - psql "dbname=howmies" -a -f init.pgsql
+  - psql -c 'create database test_howmies;' -U postgres
+  - psql "dbname=test_howmies" -a -f init.pgsql
 addons:
   postgresql: "10"
   apt:
@@ -17,11 +17,13 @@ addons:
       - postgresql-client-10
 env:
   global:
-    - DB_USER=postgres
-    - DB_HOST=localhost
-    - DB_DATABASE=howmies
-    - DB_PORT=5432
-    - DB_PASSWORD=
+    - NODE_ENV=test
+    - TEST_DB_USER=postgres
+    - TEST_DB_HOST=localhost
+    - TEST_DB_DATABASE=test_howmies
+    - TEST_DB_PORT=5432
+    - TEST_DB_PASSWORD=
+    - API_VERSION=v0.0.1
 script:
   - npm test
 deploy:
